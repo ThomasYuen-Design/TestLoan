@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Home, Wallet, FileText, MoreHorizontal, Lock, Info, Clock, X, ArrowLeft } from "lucide-react";
+import { Home, Wallet, FileText, MoreHorizontal, Lock, Info, Clock, X, ArrowLeft, Truck } from "lucide-react";
 
 /**
  * LOC — Customer Portal (Refined Upcoming + Recent Payments Logic)
@@ -223,6 +223,62 @@ export default function LocPortalApp() {
   );
 }
 
+// ---------------- Status Chip Component ----------------
+function StatusChip({ status = "active" }) {
+  return (
+    <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+      Active
+    </div>
+  );
+}
+
+// ---------------- Pending Principal Card Component ----------------
+function PendingPrincipalCard({ amount, releaseDate }) {
+  if (amount <= 0) return null;
+  
+  return (
+    <div className="rounded-2xl border border-neutral-200 p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <Lock className="h-3.5 w-3.5 text-neutral-500" />
+        <div className="text-xs uppercase tracking-wide text-neutral-500">Pending principal payments</div>
+      </div>
+      <div className="text-lg font-semibold">${amount.toLocaleString()}</div>
+      <div className="mt-1 text-xs text-neutral-500">
+        Payments can take up to 7 days to clear before increasing your available credit.
+      </div>
+      {releaseDate && (
+        <div className="mt-1 text-xs text-neutral-400">
+          Releases by {releaseDate}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------- Pending Withdrawal Card Component ----------------
+function PendingWithdrawalCard({ amount, eta }) {
+  if (amount <= 0) return null;
+  
+  return (
+    <div className="rounded-2xl border border-neutral-200 p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <Truck className="h-3.5 w-3.5 text-neutral-500" />
+        <div className="text-xs uppercase tracking-wide text-neutral-500">Pending withdrawals</div>
+      </div>
+      <div className="text-lg font-semibold">${amount.toLocaleString()}</div>
+      <div className="mt-1 text-xs text-neutral-500">
+        Your transfer is on its way. Funds typically arrive in 1–3 business days.
+      </div>
+      {eta && (
+        <div className="mt-1 text-xs text-neutral-400">
+          Expected by {eta}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 // ---------------- Home ----------------
 function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawnAmount }) {
   // STATE: Upcoming payment states: 'pending' | 'available' | 'adjusted' | 'payoff_scheduled'
@@ -233,9 +289,17 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
   const [selectedTxn, setSelectedTxn] = useState(null);
   const [showExtraPrincipal, setShowExtraPrincipal] = useState(false);
   const [showPayInFull, setShowPayInFull] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   
   // Ref for scrolling to Upcoming Payment section
   const upcomingPaymentRef = useRef(null);
+  
+  // Account status and pending data - with edge state controls
+  const [pendingPrincipalTotal, setPendingPrincipalTotal] = useState(200);
+  const [pendingPrincipalReleaseDate, setPendingPrincipalReleaseDate] = useState("Oct 15, 2025");
+  const [pendingWithdrawalTotal, setPendingWithdrawalTotal] = useState(500);
+  const [pendingWithdrawalEta, setPendingWithdrawalEta] = useState("Oct 12, 2025");
+  const [principalBalance, setPrincipalBalance] = useState(2000);
 
   // Recent activity preview (3–4 items). Amount sign: payments positive, draws negative.
   const recentActivity = [
@@ -247,8 +311,10 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
 
   const formatMoney = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "CAD" }).format(n);
 
-  // Calculate available credit after deducting pending draws
-  const availableCredit = 3000 - totalDrawnAmount;
+  // Calculate available credit after deducting principal balance and pending withdrawals
+  // Note: Pending principal payments don't affect available credit until they clear (7-day rule)
+  const creditLimit = 5000;
+  const availableCredit = creditLimit - principalBalance - pendingWithdrawalTotal;
 
   // Combine recent activity with pending draws
   const combinedActivity = [...pendingDraws, ...recentActivity].slice(0, 4);
@@ -294,7 +360,29 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
         </div>
       )}
 
-      <h1 className="text-xl font-semibold mb-4">Line of Credit</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold">Line of Credit</h1>
+        <div className="flex items-center gap-2">
+          <StatusChip />
+          {/* Edge state controls for demo */}
+          <select
+            className="text-xs border border-neutral-300 rounded-md px-2 py-1 text-neutral-600"
+            value={`${pendingPrincipalTotal}-${pendingWithdrawalTotal}-${principalBalance}`}
+            onChange={(e) => {
+              const [principal, withdrawal, balance] = e.target.value.split('-');
+              setPendingPrincipalTotal(parseInt(principal));
+              setPendingWithdrawalTotal(parseInt(withdrawal));
+              setPrincipalBalance(parseInt(balance));
+            }}
+          >
+            <option value="200-500-2000">Normal State</option>
+            <option value="200-0-2000">Payment Pending Only</option>
+            <option value="0-500-2000">Withdrawal Pending Only</option>
+            <option value="0-0-2000">No Pending</option>
+            <option value="0-0-0">$0 Principal</option>
+          </select>
+        </div>
+      </div>
 
       {/* Principal Balance - Full Width Display */}
       <div className="w-full bg-[#282828] rounded-2xl p-8 mb-4 relative overflow-hidden">
@@ -307,81 +395,81 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
             lineHeight: '1',
             fontSize: '45px'
           }}>
-            $2,000.00
+            ${principalBalance.toLocaleString()}.00
           </div>
         </div>
         {/* Bottom border to match image */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black"></div>
       </div>
 
-      {/* Other Balance Tiles */}
-      <div className="space-y-3">
+      {/* Pending Items Section */}
+      <div className="space-y-3 mb-4">
+        <PendingPrincipalCard 
+          amount={pendingPrincipalTotal} 
+          releaseDate={pendingPrincipalReleaseDate} 
+        />
+        <PendingWithdrawalCard 
+          amount={pendingWithdrawalTotal} 
+          eta={pendingWithdrawalEta} 
+        />
+      </div>
+
+      {/* Available to Draw */}
+      <div className="mb-4">
         <Tile 
-          label="Available Credit" 
+          label="Available to draw" 
           value={`$${availableCredit.toLocaleString()}`}
-          note="Credit limit $5,000 — sum of principal + available"
+          note="Credit limit $5,000"
           action={
             <div className="mt-3">
-              <h3 className="font-medium text-sm mb-1">Need Funds?</h3>
-              <p className="text-xs text-neutral-600 mb-2">
-                You can draw from your available credit instantly via Interac e‑Transfer or within 1–3 business days by direct deposit.
-              </p>
               <ActionButton label="Draw Funds" onClick={onNavigateDraw} />
             </div>
           }
         />
-        <Tile
-          label={<span className="inline-flex items-center gap-1">Pending Balance<Lock className="h-3.5 w-3.5" /></span>}
-          value="$200"
-          note="Excludes principal payments made within the last 7 days"
-        />
       </div>
 
-      {/* Upcoming Payment */}
-      <div ref={upcomingPaymentRef}>
-        <UpcomingPaymentSection paymentState={paymentState} setPaymentState={setPaymentState} />
-      </div>
+      {/* Upcoming Payment - Hide when principal balance is $0 */}
+      {principalBalance > 0 && (
+        <div ref={upcomingPaymentRef}>
+          <UpcomingPaymentSection 
+            paymentState={paymentState} 
+            setPaymentState={setPaymentState} 
+            onExtraPrincipal={() => setShowExtraPrincipal(true)}
+            onShowPaymentDetails={() => setShowPaymentDetails(true)}
+          />
+        </div>
+      )}
 
-      {/* Recent Activity */}
-      <RecentPaymentsSection payments={combinedActivity} onNavigatePayments={onNavigatePayments} onSelect={(p) => { setSelectedTxn(p); setShowReceiptModal(true); }} />
-
-      {/* Make Additional Principal Payment (compact) - Hidden when payoff is scheduled */}
-      {paymentState !== "payoff_scheduled" && (
+      {/* Request Pay In Full - Standalone Button */}
+      {principalBalance > 0 && (
         <button
-          onClick={() => setShowExtraPrincipal(true)}
+          onClick={() => setShowPayInFull(true)}
           className="mt-6 w-full rounded-2xl border border-neutral-200 p-4 text-left hover:bg-neutral-50"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-medium">Make additional principal payment</h2>
-              <p className="text-xs text-neutral-600">Add a one-time amount to your next scheduled payment.</p>
+              <h2 className="font-medium">Request Pay In Full</h2>
+              <p className="text-xs text-neutral-600">Schedule a full payoff on your next payment date.</p>
             </div>
-            <span className="text-sm text-neutral-500">Add →</span>
+            <span className="text-sm text-neutral-500">Pay off →</span>
           </div>
         </button>
       )}
 
-      {/* Pay In Full (compact) */}
-      <button
-        onClick={() => setShowPayInFull(true)}
-        className="mt-3 w-full rounded-2xl border border-neutral-200 p-4 text-left hover:bg-neutral-50"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-medium">Request Pay In Full</h2>
-            <p className="text-xs text-neutral-600">Schedule a full payoff on your next payment date.</p>
-          </div>
-          <span className="text-sm text-neutral-500">Pay off →</span>
-        </div>
-      </button>
+      {/* Recent Activity */}
+      <RecentPaymentsSection payments={combinedActivity} onNavigatePayments={onNavigatePayments} onSelect={(p) => { setSelectedTxn(p); setShowReceiptModal(true); }} />
 
       {/* Modal: Extra Principal Form */}
       {showExtraPrincipal && (
-        <Modal title="Add extra principal" onClose={() => setShowExtraPrincipal(false)}>
+        <Modal 
+          title={paymentState === "adjusted" ? "Edit extra payment" : "Add extra principal"} 
+          onClose={() => setShowExtraPrincipal(false)}
+        >
           <ExtraPrincipalForm 
-            principalBalance={2000} 
+            principalBalance={principalBalance} 
             nextMinimumDate="Oct 20, 2025" 
             statementDate="Oct 13, 2025"
+            isEditing={paymentState === "adjusted"}
             onPaymentSubmitted={(amount) => {
               setPaymentState("adjusted");
               setShowExtraPrincipal(false);
@@ -442,16 +530,50 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
           </div>
         </Modal>
       )}
+
+      {/* Payment Details Modal */}
+      {showPaymentDetails && (
+        <Modal onClose={() => setShowPaymentDetails(false)} title="Upcoming Payment Details">
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between"><span>Due Date</span><span>Oct 20, 2025</span></div>
+            <div className="flex items-center justify-between"><span>Statement Period</span><span>Sep 29 – Oct 13, 2025</span></div>
+            <div className="flex items-center justify-between"><span>Total Amount</span><span>{paymentState === "adjusted" ? "$175.50" : paymentState === "payoff_scheduled" ? "$2,340.50" : "$125.50"}</span></div>
+            <div className="flex items-center justify-between"><span>Principal</span><span>{paymentState === "payoff_scheduled" ? "$2,000.00" : "$50.00"}</span></div>
+            <div className="flex items-center justify-between"><span>Interest</span><span>$75.50</span></div>
+            <div className="flex items-center justify-between"><span>Fees</span><span>$15.00</span></div>
+            <div className="flex items-center justify-between"><span>Payment Method</span><span>Automated (PAD)</span></div>
+            {paymentState === "adjusted" && (
+              <div className="flex items-center justify-between"><span>Extra Principal</span><span>$50.00</span></div>
+            )}
+            {paymentState === "payoff_scheduled" && (
+              <div className="flex items-center justify-between"><span>Payoff Type</span><span>Full Payoff</span></div>
+            )}
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button className="rounded-md border border-neutral-300 px-3 py-2 text-sm" onClick={() => setShowPaymentDetails(false)}>Close</button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
 // ---------------- Upcoming Payment ----------------
-function UpcomingPaymentSection({ paymentState, setPaymentState }) {
+function UpcomingPaymentSection({ paymentState, setPaymentState, onExtraPrincipal, onShowPaymentDetails }) {
+  // Get the appropriate button text based on payment state
+  const getButtonText = () => {
+    return paymentState === "adjusted" ? "Edit extra payment" : "Make an extra payment";
+  };
+  
   return (
     <div className="mt-6 rounded-2xl border border-neutral-200 p-4">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="font-medium">Upcoming Payment</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-medium">Upcoming Payment</h2>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            Automated
+          </span>
+        </div>
         {/* DEV test control to simulate states */}
         <select
           className="text-xs border border-neutral-300 rounded-md px-2 py-1 text-neutral-600"
@@ -477,42 +599,75 @@ function UpcomingPaymentSection({ paymentState, setPaymentState }) {
 
       {paymentState === "available" && (
         <div>
-          <p className="text-sm text-neutral-600 mb-3">
-            Next statement: Oct 13 · Payment due Oct 20 · Amount: <span className="font-medium">$125.50</span>
-          </p>
-          <div className="grid grid-cols-1 gap-3">
-            <ActionButton label="Make a Payment" />
+          <div className="mb-2">
+            <p className="text-sm font-medium">Due Oct 20 · Amount $125.50</p>
           </div>
-          <p className="mt-3 text-xs text-neutral-500 flex items-center gap-1">
-            <Info className="h-3 w-3" /> Amount includes standard minimum principal, interest, and fees.
+          <div className="flex items-center gap-1 mb-3">
+            <button
+              onClick={onShowPaymentDetails}
+              className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              <Info className="h-3 w-3" />
+              <span>What's included</span>
+            </button>
+          </div>
+          <button
+            onClick={onExtraPrincipal}
+            className="w-full rounded-xl border border-neutral-300 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            {getButtonText()}
+          </button>
+          <p className="mt-2 text-xs text-neutral-500 text-center">
+            Add a one-time amount to your next scheduled payment.
           </p>
         </div>
       )}
 
       {paymentState === "adjusted" && (
         <div>
-          <p className="text-sm text-neutral-600 mb-2">
-            Next statement: Oct 13 · Payment due Oct 20 · Total: <span className="font-medium">$175.50</span>
-          </p>
+          <div className="mb-2">
+            <p className="text-sm font-medium">Due Oct 20 · Amount $175.50</p>
+          </div>
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 mb-3">
             <p className="text-xs text-emerald-800">Includes your additional principal payment of <span className="font-medium">$50.00</span>.</p>
           </div>
-          <div className="grid grid-cols-1 gap-3">
-            <ActionButton label="Make Payment" />
+          <div className="flex items-center gap-1 mb-3">
+            <button
+              onClick={onShowPaymentDetails}
+              className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              <Info className="h-3 w-3" />
+              <span>What's included</span>
+            </button>
           </div>
+          <button
+            onClick={onExtraPrincipal}
+            className="w-full rounded-xl border border-neutral-300 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            {getButtonText()}
+          </button>
+          <p className="mt-2 text-xs text-neutral-500 text-center">
+            Add a one-time amount to your next scheduled payment.
+          </p>
         </div>
       )}
 
       {paymentState === "payoff_scheduled" && (
         <div>
-          <p className="text-sm text-neutral-600 mb-2">
-            Next statement: Oct 13 · Payment due Oct 20 · Total: <span className="font-medium">$2,340.50</span>
-          </p>
+          <div className="mb-2">
+            <p className="text-sm font-medium">Due Oct 20 · Amount $2,340.50</p>
+          </div>
           <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 mb-3">
             <p className="text-xs text-emerald-800">Your Line of Credit will be paid in full on your next scheduled payment date. This includes the full principal balance plus accrued interest and fees.</p>
           </div>
-          <div className="grid grid-cols-1 gap-3">
-            <ActionButton label="Make Full Payment" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onShowPaymentDetails}
+              className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              <Info className="h-3 w-3" />
+              <span>What's included</span>
+            </button>
           </div>
         </div>
       )}
@@ -1153,7 +1308,7 @@ function StatementToggle() {
   );
 }
 
-function ExtraPrincipalForm({ principalBalance, nextMinimumDate, statementDate, onPaymentSubmitted }) {
+function ExtraPrincipalForm({ principalBalance, nextMinimumDate, statementDate, onPaymentSubmitted, isEditing = false }) {
   const [amount, setAmount] = useState("");
   const [statementIssued, setStatementIssued] = useState(false); // simulate API: toggled for demo
   const [submitted, setSubmitted] = useState(false);
@@ -1215,11 +1370,11 @@ function ExtraPrincipalForm({ principalBalance, nextMinimumDate, statementDate, 
       <p className="text-xs text-neutral-600">{appliesText}</p>
       {error && <p className="text-xs text-red-600">{error}</p>}
       <button disabled={!valid} className={`w-full rounded-xl py-3 text-sm font-medium text-white ${valid ? 'bg-neutral-900' : 'bg-neutral-300 cursor-not-allowed'}`}>
-        Add to next payment
+        {isEditing ? 'Update extra payment' : 'Add to next payment'}
       </button>
       {submitted && (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-          Extra principal of <strong>${parsed.toFixed(2)}</strong> scheduled. {appliesText}
+          {isEditing ? 'Extra payment updated to' : 'Extra principal of'} <strong>${parsed.toFixed(2)}</strong> {isEditing ? 'scheduled.' : 'scheduled.'} {appliesText}
         </div>
       )}
 
