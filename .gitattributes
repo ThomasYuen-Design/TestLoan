@@ -1,0 +1,85 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Custom for Visual Studio
+*.cs     diff=csharp
+*.sln    merge=union
+*.suo    binary
+*.user   binary
+*.useros binary
+*.pidb   binary
+*.booproj binary
+*.svd    binary
+*.pdb    binary
+*.opendb binary
+*.opensdf binary
+*.sdf    binary
+*.cachefile binary
+*.VC.db  binary
+*.VC.VC.opendb binary
+
+# Custom for Visual Studio Code
+*.code-workspace text
+
+# Custom for Xcode
+*.pbxuser text
+*.mode1v3 text
+*.mode2v3 text
+*.perspectivev3 text
+*.xcuserstate binary
+*.xcworkspace text
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings text
+
+# Custom for JetBrains IDEs
+*.iml text
+*.ipr text
+*.iws text
+
+# Custom for Sublime Text
+*.sublime-project text
+*.sublime-workspace text
+
+# Custom for Atom
+*.atom text
+
+# Custom for Vim
+*.swp text
+*.swo text
+
+# Custom for Emacs
+*~ text
+\#*\# text
+/.emacs.desktop text
+/.emacs.desktop.lock text
+/.emacs.bmk text
+
+# Custom for macOS
+.DS_Store binary
+
+# Custom for Windows
+Thumbs.db binary
+ehthumbs.db binary
+Desktop.ini text
+
+# Custom for Linux
+*~ text
+
+# Custom for Node.js
+package.json text
+package-lock.json text
+yarn.lock text
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.md text
+*.yml text
+*.yaml text
+
+# Custom for React/Vite
+*.html text
+*.css text
+*.scss text
+*.sass text
+*.less text
