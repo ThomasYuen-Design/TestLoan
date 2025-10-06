@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Home, Wallet, FileText, MoreHorizontal, Lock, Info, Clock, X, ArrowLeft } from "lucide-react";
 
 /**
@@ -233,6 +233,9 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
   const [selectedTxn, setSelectedTxn] = useState(null);
   const [showExtraPrincipal, setShowExtraPrincipal] = useState(false);
   const [showPayInFull, setShowPayInFull] = useState(false);
+  
+  // Ref for scrolling to Upcoming Payment section
+  const upcomingPaymentRef = useRef(null);
 
   // Recent activity preview (3–4 items). Amount sign: payments positive, draws negative.
   const recentActivity = [
@@ -249,6 +252,16 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
 
   // Combine recent activity with pending draws
   const combinedActivity = [...pendingDraws, ...recentActivity].slice(0, 4);
+
+  // Function to scroll to Upcoming Payment section
+  const scrollToUpcomingPayment = () => {
+    if (upcomingPaymentRef.current) {
+      upcomingPaymentRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  };
 
   return (
     <div className="p-4">
@@ -287,11 +300,12 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
       <div className="w-full bg-[#282828] rounded-2xl p-8 mb-4 relative overflow-hidden">
         <div className="text-right">
           <div className="text-sm text-[#808080] mb-3 font-medium">Principal Balance</div>
-          <div className="text-6xl font-black text-white" style={{ 
+          <div className="font-normal text-white" style={{ 
             fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
             letterSpacing: '0.05em',
             textShadow: '0 0 10px rgba(255, 255, 255, 0.1)',
-            lineHeight: '1'
+            lineHeight: '1',
+            fontSize: '45px'
           }}>
             $2,000.00
           </div>
@@ -324,7 +338,9 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
       </div>
 
       {/* Upcoming Payment */}
-      <UpcomingPaymentSection paymentState={paymentState} setPaymentState={setPaymentState} />
+      <div ref={upcomingPaymentRef}>
+        <UpcomingPaymentSection paymentState={paymentState} setPaymentState={setPaymentState} />
+      </div>
 
       {/* Recent Activity */}
       <RecentPaymentsSection payments={combinedActivity} onNavigatePayments={onNavigatePayments} onSelect={(p) => { setSelectedTxn(p); setShowReceiptModal(true); }} />
@@ -369,6 +385,8 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
             onPaymentSubmitted={(amount) => {
               setPaymentState("adjusted");
               setShowExtraPrincipal(false);
+              // Scroll to Upcoming Payment section to show the update
+              setTimeout(() => scrollToUpcomingPayment(), 100);
             }}
           />
         </Modal>
@@ -384,6 +402,8 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
             onPayoffScheduled={() => {
               setPaymentState("payoff_scheduled");
               setShowPayInFull(false);
+              // Scroll to Upcoming Payment section to show the update
+              setTimeout(() => scrollToUpcomingPayment(), 100);
             }}
           />
         </Modal>
