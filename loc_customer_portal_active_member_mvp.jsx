@@ -474,8 +474,8 @@ function UpcomingPaymentSection({ paymentState, setPaymentState }) {
           <p className="text-sm text-neutral-600 mb-2">
             Next statement: Oct 13 · Payment due Oct 20 · Total: <span className="font-medium">$175.50</span>
           </p>
-          <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-3 mb-3">
-            <p className="text-xs text-neutral-700">Includes your additional principal payment of <span className="font-medium">$50.00</span>.</p>
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 mb-3">
+            <p className="text-xs text-emerald-800">Includes your additional principal payment of <span className="font-medium">$50.00</span>.</p>
           </div>
           <div className="grid grid-cols-1 gap-3">
             <ActionButton label="Make Payment" />
