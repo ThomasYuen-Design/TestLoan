@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ProgressHeader from "../components/ProgressHeader.jsx";
+import ContinueButton from "../components/ContinueButton.jsx";
 
 export default function Step2DirectDeposit({ onContinue, onBack, initialData = {} }) {
   const [directDeposit, setDirectDeposit] = useState(initialData.directDeposit || "");
@@ -13,7 +14,7 @@ export default function Step2DirectDeposit({ onContinue, onBack, initialData = {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6">
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
       <ProgressHeader currentStep={2} totalSteps={6} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
@@ -24,7 +25,7 @@ export default function Step2DirectDeposit({ onContinue, onBack, initialData = {
         DO YOU GET PAID VIA DIRECT DEPOSIT?
       </h2>
 
-      <div className="space-y-3 flex-1">
+      <div className="space-y-3">
         <label 
           className={`flex items-center justify-between px-4 py-4 rounded-lg cursor-pointer transition-colors ${
             directDeposit === "yes" ? "bg-black text-white" : "bg-gray-50 hover:bg-gray-100"
@@ -57,17 +58,7 @@ export default function Step2DirectDeposit({ onContinue, onBack, initialData = {
         </label>
       </div>
 
-      <button
-        onClick={handleContinue}
-        disabled={!isComplete}
-        className={`mt-8 w-full rounded-lg py-3 font-semibold transition-colors ${
-          isComplete
-            ? "bg-black text-white hover:bg-gray-800"
-            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-        }`}
-      >
-        CONTINUE
-      </button>
+      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }

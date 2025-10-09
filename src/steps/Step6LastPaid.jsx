@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import ProgressHeader from "../components/ProgressHeader.jsx";
+import ContinueButton from "../components/ContinueButton.jsx";
 
 const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -33,14 +34,14 @@ export default function Step6LastPaid({ onContinue, onBack, frequency, weekday, 
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6">
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
       <ProgressHeader currentStep={6} totalSteps={6} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
         STEP 6 OF 6 – LAST PAYDAY
       </p>
 
-      <div className="flex-1">
+      <div>
         <h2 className="text-lg font-semibold mb-2">
           {frequency === "Weekly" ? "Choose your pay cycle for repayments" : "Which date were you last paid?"}
         </h2>
@@ -74,17 +75,7 @@ export default function Step6LastPaid({ onContinue, onBack, frequency, weekday, 
         )}
       </div>
 
-      <button
-        onClick={handleContinue}
-        disabled={!isComplete}
-        className={`mt-8 w-full rounded-lg py-3 font-semibold transition-colors ${
-          isComplete
-            ? "bg-black text-white hover:bg-gray-800"
-            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-        }`}
-      >
-        CONTINUE
-      </button>
+      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }

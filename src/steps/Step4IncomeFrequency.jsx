@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ProgressHeader from "../components/ProgressHeader.jsx";
+import ContinueButton from "../components/ContinueButton.jsx";
 
 export default function Step4IncomeFrequency({ onContinue, onBack, initialData = {} }) {
   const [frequency, setFrequency] = useState(initialData.frequency || "");
@@ -15,14 +16,14 @@ export default function Step4IncomeFrequency({ onContinue, onBack, initialData =
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6">
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
       <ProgressHeader currentStep={4} totalSteps={6} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
         STEP 4 OF 6 – INCOME FREQUENCY
       </p>
 
-      <div className="flex-1">
+      <div>
         <h2 className="text-lg font-semibold mb-2">
           What's your income frequency?
         </h2>
@@ -54,17 +55,7 @@ export default function Step4IncomeFrequency({ onContinue, onBack, initialData =
         </div>
       </div>
 
-      <button
-        onClick={handleContinue}
-        disabled={!isComplete}
-        className={`mt-8 w-full rounded-lg py-3 font-semibold transition-colors ${
-          isComplete
-            ? "bg-black text-white hover:bg-gray-800"
-            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-        }`}
-      >
-        CONTINUE
-      </button>
+      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }

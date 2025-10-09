@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import ProgressHeader from "./components/ProgressHeader.jsx";
+import ContinueButton from "./components/ContinueButton.jsx";
 
 /**
  * Paydate Flow – Client (Fora-style) version
@@ -97,7 +98,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-5 space-y-6 text-neutral-900">
+    <div className="w-full max-w-md mx-auto p-5 pb-24 space-y-6 text-neutral-900">
       <ProgressHeader currentStep={2} totalSteps={6} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-2">
@@ -270,15 +271,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
       )}
 
       {/* CTA */}
-      <button
-        disabled={!canContinue}
-        onClick={handleContinue}
-        className={`w-full rounded-full h-12 tracking-wide uppercase font-semibold ${
-          canContinue ? "bg-neutral-900 text-white shadow-md" : "bg-neutral-200 text-neutral-500"
-        }`}
-      >
-        Continue
-      </button>
+      <ContinueButton onClick={handleContinue} disabled={!canContinue} children="Continue" />
     </div>
   );
 }

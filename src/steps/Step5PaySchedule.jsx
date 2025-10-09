@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ProgressHeader from "../components/ProgressHeader.jsx";
 import { Info } from "lucide-react";
+import ContinueButton from "../components/ContinueButton.jsx";
 
 const WEEKDAYS = [
   { label: "Mon", value: 1 },
@@ -34,14 +35,14 @@ export default function Step5PaySchedule({ onContinue, onBack, frequency, initia
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6">
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
       <ProgressHeader currentStep={5} totalSteps={6} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
         STEP 5 OF 6 – PAY SCHEDULE
       </p>
 
-      <div className="flex-1">
+      <div>
         {/* Info rule (implicit holiday/weekend policy) */}
         <div className="flex items-start gap-2 text-xs text-neutral-600 mb-6 bg-blue-50 p-3 rounded-lg">
           <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -147,17 +148,7 @@ export default function Step5PaySchedule({ onContinue, onBack, frequency, initia
         )}
       </div>
 
-      <button
-        onClick={handleContinue}
-        disabled={!isComplete}
-        className={`mt-8 w-full rounded-lg py-3 font-semibold transition-colors ${
-          isComplete
-            ? "bg-black text-white hover:bg-gray-800"
-            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-        }`}
-      >
-        CONTINUE
-      </button>
+      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }
