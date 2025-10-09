@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Info } from "lucide-react";
 import ProgressHeader from "./components/ProgressHeader.jsx";
 import ContinueButton from "./components/ContinueButton.jsx";
@@ -64,6 +64,12 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
   // monthly
   const [monthlyDay, setMonthlyDay] = useState(null);
 
+  // Refs for scrolling
+  const weekdaySectionRef = useRef(null);
+  const recentDatesSectionRef = useRef(null);
+  const semiMonthlySectionRef = useRef(null);
+  const monthlySectionRef = useRef(null);
+
   // validation per frequency
   const canContinue = useMemo(() => {
     if (!frequency) return false;
@@ -86,6 +92,29 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
     setChosenRecent(null);
     setSemiDays([]);
     setMonthlyDay(null);
+    
+    // Scroll to next section after a short delay to allow state update
+    setTimeout(() => {
+      if (f === "Weekly" || f === "Bi-weekly") {
+        weekdaySectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      } else if (f === "Semi-monthly") {
+        semiMonthlySectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      } else if (f === "Monthly") {
+        monthlySectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 100);
   }
 
   // Submit handler (for demo, just log selection)
@@ -149,7 +178,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
 
           {/* Weekly & Bi-weekly: weekday chips, then recent-date choice */}
           {(frequency === "Weekly" || frequency === "Bi-weekly") && (
-            <div className="space-y-3">
+            <div className="space-y-3" ref={weekdaySectionRef}>
               <div className="text-sm font-semibold">Which weekday do you get paid?</div>
               <div className="flex gap-2">
                 {WEEKDAYS.map((d) => (
@@ -158,6 +187,14 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
                     onClick={() => {
                       setWeekday(d.value);
                       setChosenRecent(null);
+                      // Scroll to recent dates section after selecting weekday
+                      setTimeout(() => {
+                        recentDatesSectionRef.current?.scrollIntoView({ 
+                          behavior: 'smooth', 
+                          block: 'start',
+                          inline: 'nearest'
+                        });
+                      }, 100);
                     }}
                     className={`px-3 py-2 rounded-full border text-sm ${
                       weekday === d.value ? "border-neutral-900" : "border-neutral-300"
@@ -169,7 +206,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
               </div>
 
               {weekday && (
-                <div className="space-y-2">
+                <div className="space-y-2" ref={recentDatesSectionRef}>
                   <div className="text-sm font-semibold">
                     {frequency === "Weekly" ? "Choose your pay cycle for repayments" : "Which date were you last paid?"}
                   </div>
@@ -198,7 +235,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
 
           {/* Semi-monthly: pick two days */}
           {frequency === "Semi-monthly" && (
-            <div className="space-y-3">
+            <div className="space-y-3" ref={semiMonthlySectionRef}>
               <div className="text-sm font-semibold">Select the two days you're paid every month</div>
               <div className="grid grid-cols-5 gap-2">
                 {dayTiles.map((d) => (
@@ -241,7 +278,7 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
 
           {/* Monthly: pick one day */}
           {frequency === "Monthly" && (
-            <div className="space-y-3">
+            <div className="space-y-3" ref={monthlySectionRef}>
               <div className="text-sm font-semibold">Select the day you're paid every month</div>
               <div className="grid grid-cols-5 gap-2">
                 {dayTiles.map((d) => (
