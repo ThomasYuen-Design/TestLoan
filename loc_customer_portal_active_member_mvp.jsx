@@ -181,6 +181,8 @@ export default function LocPortalApp() {
   const [tab, setTab] = useState("home");
   const [pendingDraws, setPendingDraws] = useState([]);
   const [totalDrawnAmount, setTotalDrawnAmount] = useState(0);
+  const [accountStatus, setAccountStatus] = useState("frozen"); // "active" | "frozen"
+  const [showDrawDisabledPopup, setShowDrawDisabledPopup] = useState(false);
 
   const handleDrawSubmitted = (drawData) => {
     const newDraw = {
@@ -198,15 +200,50 @@ export default function LocPortalApp() {
     // Don't automatically navigate to home - let user stay on success page
   };
 
+  // Handle Draw tab click - show popup if in frozen state
+  const handleDrawTabClick = () => {
+    if (accountStatus === "frozen") {
+      setShowDrawDisabledPopup(true);
+    } else {
+      setTab("draw");
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-white text-neutral-900">
       <div className="flex-1 overflow-y-auto pb-16">
-        {tab === "home" && <HomePage 
-          onNavigatePayments={() => setTab("payments")} 
-          onNavigateDraw={() => setTab("draw")}
-          pendingDraws={pendingDraws}
-          totalDrawnAmount={totalDrawnAmount}
-        />}
+        {/* Demo toggle for account status - top-right corner */}
+        <div className="fixed top-4 right-4 z-40">
+          <select
+            className="text-xs border-2 border-neutral-400 rounded-lg px-3 py-2 bg-white text-neutral-700 shadow-lg font-medium"
+            value={accountStatus}
+            onChange={(e) => {
+              setAccountStatus(e.target.value);
+              setTab("home"); // Reset to home when switching status
+            }}
+          >
+            <option value="active">Demo: Active Account</option>
+            <option value="frozen">Demo: Frozen Account</option>
+          </select>
+        </div>
+
+        {/* Conditionally render HomePage based on account status */}
+        {tab === "home" && accountStatus === "active" && (
+          <HomePage 
+            onNavigatePayments={() => setTab("payments")} 
+            onNavigateDraw={() => setTab("draw")}
+            pendingDraws={pendingDraws}
+            totalDrawnAmount={totalDrawnAmount}
+          />
+        )}
+        {tab === "home" && accountStatus === "frozen" && (
+          <HomePageDefault 
+            onNavigatePayments={() => setTab("payments")}
+            pendingDraws={pendingDraws}
+            totalDrawnAmount={totalDrawnAmount}
+          />
+        )}
+        
         {tab === "payments" && <PaymentsPage onNavigateHome={() => setTab("home")} />}
         {tab === "draw" && <DrawPage onDrawSubmitted={handleDrawSubmitted} onNavigateHome={() => setTab("home")} />}
         {tab === "docs" && <DocsPage />}
@@ -215,19 +252,39 @@ export default function LocPortalApp() {
 
       <nav className="fixed bottom-0 left-0 right-0 flex border-t border-neutral-200 bg-white">
         <TabButton icon={Home} label="Home" active={tab === "home"} onClick={() => setTab("home")} />
-        <TabButton icon={Wallet} label="Draw" active={tab === "draw"} onClick={() => setTab("draw")} />
+        <TabButton icon={Wallet} label="Draw" active={tab === "draw"} onClick={handleDrawTabClick} />
         <TabButton icon={FileText} label="Docs" active={tab === "docs"} onClick={() => setTab("docs")} />
         <TabButton icon={MoreHorizontal} label="More" active={tab === "more"} onClick={() => setTab("more")} />
       </nav>
+
+      {/* Draw Disabled Popup */}
+      {showDrawDisabledPopup && (
+        <DrawDisabledPopup onClose={() => setShowDrawDisabledPopup(false)} />
+      )}
     </div>
   );
 }
 
 // ---------------- Status Chip Component ----------------
 function StatusChip({ status = "active" }) {
+  const statusStyles = {
+    active: {
+      bg: "bg-emerald-100",
+      text: "text-emerald-800",
+      label: "Active"
+    },
+    frozen: {
+      bg: "bg-amber-100",
+      text: "text-amber-800",
+      label: "Frozen"
+    }
+  };
+  
+  const style = statusStyles[status] || statusStyles.active;
+  
   return (
-    <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-      Active
+    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {style.label}
     </div>
   );
 }
@@ -275,6 +332,105 @@ function PendingWithdrawalCard({ amount, eta }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ---------------- Missed Payment Card Component ----------------
+function MissedPaymentCard({ payment }) {
+  const { dueDate, daysOverdue, totalAmount, principal, interest, fees } = payment;
+  
+  return (
+    <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <div className="text-sm font-semibold text-red-900">Payment Overdue</div>
+          <div className="text-xs text-red-700 mt-0.5">Due {dueDate} · {daysOverdue} days overdue</div>
+        </div>
+        <div className="text-lg font-bold text-red-900">${totalAmount.toFixed(2)}</div>
+      </div>
+      
+      <div className="bg-white rounded-lg p-3">
+        <div className="text-xs font-medium text-neutral-600 mb-2">Payment Breakdown</div>
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Principal</span>
+            <span className="font-medium text-neutral-900">${principal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Interest</span>
+            <span className="font-medium text-neutral-900">${interest.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-600">Fees</span>
+            <span className="font-medium text-neutral-900">${fees.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Contact Us Alert Component ----------------
+function ContactUsAlert({ tollFreeNumber = "1-800-123-4567" }) {
+  return (
+    <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 mb-4">
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center">
+          <Info className="h-5 w-5 text-amber-800" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-amber-900 mb-1">Payment Required</h3>
+          <p className="text-xs text-amber-800 mb-3">
+            Your account is frozen. Please contact us immediately to bring your account current and avoid further action.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <a 
+              href={`tel:${tollFreeNumber.replace(/[^0-9]/g, '')}`}
+              className="inline-flex items-center justify-center rounded-xl bg-amber-600 hover:bg-amber-700 px-4 py-2 text-sm font-semibold text-white transition-colors"
+            >
+              Call {tollFreeNumber}
+            </a>
+            <button className="inline-flex items-center justify-center rounded-xl border-2 border-amber-600 bg-white hover:bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 transition-colors">
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Draw Disabled Popup Component ----------------
+function DrawDisabledPopup({ onClose, tollFreeNumber = "1-800-123-4567" }) {
+  return (
+    <Modal title="Drawing Unavailable" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
+          <p className="text-sm text-amber-900">
+            You cannot draw funds while your account has missed payments. Please bring your account current first.
+          </p>
+        </div>
+        
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-neutral-900">What you need to do:</h4>
+          <ul className="text-xs text-neutral-700 space-y-1 list-disc list-inside">
+            <li>Pay all outstanding missed payments</li>
+            <li>Wait for payment to clear (up to 7 business days)</li>
+            <li>Your draw functionality will be restored automatically</li>
+          </ul>
+        </div>
+        
+        <div className="border-t pt-4">
+          <p className="text-xs text-neutral-600 mb-3">Need assistance?</p>
+          <a 
+            href={`tel:${tollFreeNumber.replace(/[^0-9]/g, '')}`}
+            className="block w-full text-center rounded-xl bg-neutral-900 hover:bg-neutral-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+          >
+            Call {tollFreeNumber}
+          </a>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -363,7 +519,7 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Line of Credit</h1>
         <div className="flex items-center gap-2">
-          <StatusChip />
+          <StatusChip status="active" />
           {/* Edge state controls for demo */}
           <select
             className="text-xs border border-neutral-300 rounded-md px-2 py-1 text-neutral-600"
@@ -551,6 +707,280 @@ function HomePage({ onNavigatePayments, onNavigateDraw, pendingDraws, totalDrawn
           </div>
           <div className="mt-4 flex items-center justify-end gap-2">
             <button className="rounded-md border border-neutral-300 px-3 py-2 text-sm" onClick={() => setShowPaymentDetails(false)}>Close</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------------- Home (Frozen State) ----------------
+function HomePageDefault({ onNavigatePayments, pendingDraws, totalDrawnAmount }) {
+  const [selectedTxn, setSelectedTxn] = useState(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  
+  // Account data for default state
+  const [principalBalance, setPrincipalBalance] = useState(2500);
+  const creditLimit = 5000;
+  const availableCredit = creditLimit - principalBalance;
+  
+  // Missed payments data - can have multiple
+  const [missedPayments, setMissedPayments] = useState([
+    {
+      dueDate: "Aug 20, 2025",
+      daysOverdue: 45,
+      totalAmount: 420.00,
+      principal: 140.00,
+      interest: 260.00,
+      fees: 20.00
+    },
+    {
+      dueDate: "Sep 20, 2025",
+      daysOverdue: 15,
+      totalAmount: 425.00,
+      principal: 145.00,
+      interest: 260.00,
+      fees: 20.00
+    }
+  ]);
+
+  // Upcoming payment (if automated payment is still scheduled)
+  const upcomingPayment = {
+    dueDate: "Oct 20, 2025",
+    amount: 430.00,
+    principal: 150.00,
+    interest: 260.00,
+    fees: 20.00
+  };
+
+  // Recent activity preview (read-only in default state)
+  const recentActivity = [
+    { date: "Jul 20, 2025", type: "payment", amount: 420.0, principal: 135.0, interest: 265.0, fees: 20.0, method: "PAD", ref: "2HJ-43Q" },
+    { date: "Jun 20, 2025", type: "payment", amount: 420.0, principal: 130.0, interest: 270.0, fees: 20.0, method: "PAD", ref: "8PL-99A" },
+    { date: "Jun 15, 2025", type: "draw", amount: -500.0, method: "Interac e‑Transfer", ref: "ETR-551" },
+  ];
+
+  const formatMoney = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "CAD" }).format(n);
+  const combinedActivity = [...pendingDraws, ...recentActivity].slice(0, 4);
+
+  return (
+    <div className="p-4">
+      {/* Contact Us Alert Banner */}
+      <ContactUsAlert tollFreeNumber="1-800-123-4567" />
+
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold">Line of Credit</h1>
+        <div className="flex items-center gap-2">
+          <StatusChip status="frozen" />
+          {/* Edge state control for demo */}
+          <select
+            className="text-xs border border-neutral-300 rounded-md px-2 py-1 text-neutral-600"
+            value={missedPayments.length}
+            onChange={(e) => {
+              const count = parseInt(e.target.value);
+              if (count === 1) {
+                setMissedPayments([missedPayments[0]]);
+              } else if (count === 2) {
+                setMissedPayments([
+                  {
+                    dueDate: "Aug 20, 2025",
+                    daysOverdue: 45,
+                    totalAmount: 420.00,
+                    principal: 140.00,
+                    interest: 260.00,
+                    fees: 20.00
+                  },
+                  {
+                    dueDate: "Sep 20, 2025",
+                    daysOverdue: 15,
+                    totalAmount: 425.00,
+                    principal: 145.00,
+                    interest: 260.00,
+                    fees: 20.00
+                  }
+                ]);
+              }
+            }}
+          >
+            <option value="1">1 Missed Payment</option>
+            <option value="2">2 Missed Payments</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Principal Balance - Full Width Display */}
+      <div className="w-full bg-[#282828] rounded-2xl p-8 mb-4 relative overflow-hidden">
+        <div className="text-right">
+          <div className="text-sm text-[#808080] mb-3 font-medium">Principal Balance</div>
+          <div className="font-normal text-white" style={{ 
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+            letterSpacing: '0.05em',
+            textShadow: '0 0 10px rgba(255, 255, 255, 0.1)',
+            lineHeight: '1',
+            fontSize: '45px'
+          }}>
+            ${principalBalance.toLocaleString()}.00
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black"></div>
+      </div>
+
+      {/* Missed Payments Section - Combined */}
+      <div className="mb-4">
+        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <div className="text-sm font-semibold text-red-900">
+                {missedPayments.length > 1 ? `${missedPayments.length} Payments Overdue` : 'Payment Overdue'}
+              </div>
+              {missedPayments.length === 1 ? (
+                <div className="text-xs text-red-700 mt-0.5">
+                  Due {missedPayments[0].dueDate} · {missedPayments[0].daysOverdue} days overdue
+                </div>
+              ) : (
+                <div className="text-xs text-red-700 mt-0.5">
+                  Multiple payments past due
+                </div>
+              )}
+            </div>
+            <div className="text-lg font-bold text-red-900">
+              ${missedPayments.reduce((sum, p) => sum + p.totalAmount, 0).toFixed(2)}
+            </div>
+          </div>
+          
+          {/* Individual payment breakdown if multiple */}
+          {missedPayments.length > 1 && (
+            <div className="bg-white rounded-lg p-3 mb-3">
+              <div className="text-xs font-medium text-neutral-600 mb-2">Missed Payments</div>
+              <div className="space-y-2">
+                {missedPayments.map((payment, index) => (
+                  <div key={index} className="flex justify-between items-start pb-2 border-b border-neutral-200 last:border-b-0 last:pb-0">
+                    <div>
+                      <div className="text-xs text-neutral-600">Due {payment.dueDate}</div>
+                      <div className="text-xs text-red-600">{payment.daysOverdue} days overdue</div>
+                    </div>
+                    <div className="text-sm font-semibold text-neutral-900">${payment.totalAmount.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Total breakdown */}
+          <div className="bg-white rounded-lg p-3 mb-3">
+            <div className="text-xs font-medium text-neutral-600 mb-2">Total Payment Breakdown</div>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Principal</span>
+                <span className="font-medium text-neutral-900">
+                  ${missedPayments.reduce((sum, p) => sum + p.principal, 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Interest</span>
+                <span className="font-medium text-neutral-900">
+                  ${missedPayments.reduce((sum, p) => sum + p.interest, 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Fees</span>
+                <span className="font-medium text-neutral-900">
+                  ${missedPayments.reduce((sum, p) => sum + p.fees, 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment instructions */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div className="text-xs font-medium text-amber-900 mb-1">How to Make Payment</div>
+            <div className="text-xs text-amber-800 space-y-1">
+              <p>To bring your account current, please initiate an e-Transfer or direct transfer from your bank:</p>
+              <ul className="list-disc list-inside ml-2 mt-1">
+                <li>Send to: <span className="font-medium">payments@mogo.ca</span></li>
+                <li>Include your account number in the message</li>
+                <li>Or call {' '}
+                  <a href="tel:18001234567" className="font-medium underline">
+                    1-800-123-4567
+                  </a>
+                  {' '}for payment options
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Available Credit - Greyed Out */}
+      <div className="mb-4">
+        <Tile 
+          label="Available to draw" 
+          value={`$${availableCredit.toLocaleString()}`}
+          note="Credit unavailable until missed payment(s) are paid"
+          disabled={true}
+        />
+      </div>
+
+      {/* Upcoming Payment (if any automated payment is scheduled) */}
+      <div className="mb-4 rounded-2xl border border-neutral-200 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="font-medium">Upcoming Payment</h2>
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Automated
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className="mb-2">
+            <p className="text-sm font-medium">Due {upcomingPayment.dueDate} · Amount ${upcomingPayment.amount.toFixed(2)}</p>
+          </div>
+          <div className="rounded-xl bg-blue-50 border border-blue-200 p-3">
+            <p className="text-xs text-blue-800">
+              Your scheduled payment will still be processed. This will be applied to your outstanding balance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <RecentPaymentsSection 
+        payments={combinedActivity} 
+        onNavigatePayments={onNavigatePayments} 
+        onSelect={(p) => { 
+          setSelectedTxn(p); 
+          setShowReceiptModal(true); 
+        }} 
+      />
+
+      {/* Receipt Modal */}
+      {showReceiptModal && selectedTxn && (
+        <Modal onClose={() => setShowReceiptModal(false)} title={selectedTxn?.type === 'payment' ? 'Payment receipt' : 'Draw details'}>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between"><span>Date</span><span>{selectedTxn?.date}</span></div>
+            <div className="flex items-center justify-between"><span>Type</span><span className="capitalize">{selectedTxn?.type}</span></div>
+            <div className="flex items-center justify-between"><span>Amount</span><span>{selectedTxn?.amount < 0 ? '-' : ''}{formatMoney(Math.abs(selectedTxn?.amount || 0))}</span></div>
+            {selectedTxn?.type === 'payment' && (
+              <>
+                <div className="flex items-center justify-between"><span>Principal</span><span>{formatMoney(selectedTxn?.principal)}</span></div>
+                <div className="flex items-center justify-between"><span>Interest</span><span>{formatMoney(selectedTxn?.interest)}</span></div>
+                <div className="flex items-center justify-between"><span>Fees</span><span>{formatMoney(selectedTxn?.fees)}</span></div>
+              </>
+            )}
+            <div className="flex items-center justify-between"><span>Method</span><span>{selectedTxn?.method || '—'}</span></div>
+            <div className="flex items-center justify-between"><span>Reference</span><span>{selectedTxn?.ref || '—'}</span></div>
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button className="rounded-md border border-neutral-300 px-3 py-2 text-sm" onClick={() => setShowReceiptModal(false)}>Close</button>
+            <button 
+              className="rounded-md bg-neutral-900 px-3 py-2 text-sm text-white hover:bg-neutral-800"
+              onClick={() => {
+                const fileName = selectedTxn?.type === 'payment' ? `payment-receipt-${selectedTxn?.ref}.pdf` : `draw-details-${selectedTxn?.ref}.pdf`;
+                alert(`Downloading ${fileName}...\n\nThis would trigger a real PDF download in production.`);
+              }}
+            >
+              Download PDF
+            </button>
           </div>
         </Modal>
       )}
@@ -1464,13 +1894,18 @@ function PayInFullForm({ estimatedPayoff, nextMinimumDate, statementDate, onPayo
 }
 
 // ---------------- UI Components ----------------
-function Tile({ label, value, note, action }) {
+function Tile({ label, value, note, action, disabled = false }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 p-3">
-      <div className="text-xs uppercase tracking-wide text-neutral-500">{label}</div>
-      <div className="text-lg font-semibold">{value}</div>
+    <div className={`rounded-2xl border p-3 ${disabled ? 'border-neutral-300 bg-neutral-50' : 'border-neutral-200 bg-white'}`}>
+      <div className={`text-xs uppercase tracking-wide ${disabled ? 'text-neutral-400' : 'text-neutral-500'}`}>
+        {label}
+      </div>
+      <div className={`text-lg font-semibold ${disabled ? 'text-neutral-400' : 'text-neutral-900'}`}>
+        {disabled && <Lock className="inline h-4 w-4 mr-1 mb-0.5" />}
+        {value}
+      </div>
       {note && (
-        <div className="mt-1 text-xs text-neutral-500 flex items-center gap-1">
+        <div className={`mt-1 text-xs flex items-center gap-1 ${disabled ? 'text-neutral-400' : 'text-neutral-500'}`}>
           <Info className="h-3.5 w-3.5" /> {note}
         </div>
       )}
