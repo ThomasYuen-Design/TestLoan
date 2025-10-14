@@ -12,11 +12,9 @@ import ContinueButton from "./components/ContinueButton.jsx";
 // Utility helpers
 const currency = (n) => {
   const clamped = isNaN(n) ? 0 : n;
-  return clamped.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
+  return `$${clamped.toLocaleString(undefined, {
     maximumFractionDigits: 0,
-  });
+  })}`;
 };
 
 
@@ -42,133 +40,114 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
+    <div className="min-h-screen bg-white text-black flex flex-col">
       <ProgressHeader currentStep={3} totalSteps={4} onBack={onBack} />
 
-      <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 3 OF 4 – LOAN AMOUNT
-      </p>
-
-      <h2 className="text-lg font-semibold mb-6">
-        CUSTOMIZE YOUR LINE OF CREDIT
-      </h2>
-
-      {/* Pre-approval Info - Static */}
-      <div className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
-        <div className="text-sm text-gray-600">You're pre-approved for up to</div>
-        <div className="text-3xl font-bold text-gray-900">{currency(preapprovedMax)}</div>
-      </div>
-
-      {/* Amount Display - Dynamic */}
-      <div className="mb-8">
-        <div className="text-5xl font-bold text-gray-900 mb-2">
-          {amount === 0 ? "0" : currency(amount)}
-        </div>
-        <div className="text-sm text-gray-500">
-          {currency(minDraw)} minimum • {currency(preapprovedMax)} maximum
-        </div>
-        {amount < minDraw && amount > 0 && (
-          <div className="text-sm text-red-500 mt-2">
-            • Below minimum of {currency(minDraw)}
-          </div>
-        )}
-        {amount === 0 && (
-          <div className="text-sm text-gray-400 mt-2">
-            • Enter your desired loan amount
-          </div>
-        )}
-      </div>
-
-      {/* APR Info */}
-      <div className="mb-8">
-        <p className="text-xs text-gray-500">
-          Based on bi‑weekly payments, APR of {apr}% not including optional services and fees.
+      <div className="flex-1 p-6">
+        <p className="text-xs tracking-wide text-gray-500 mb-8">
+          STEP 3 OF 4 – LOAN AMOUNT
         </p>
-      </div>
 
-      {/* Loan Product Info */}
-      <div className="border border-gray-200 rounded-lg p-4 mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-bold tracking-wide text-gray-900">MINI MONEY</h3>
-          <span className="text-sm text-gray-500">Everyday Loan</span>
+        <h2 className="text-lg font-semibold mb-6">
+          CUSTOMIZE YOUR LINE OF CREDIT
+        </h2>
+
+        {/* Pre-approval Info - Static */}
+        <div className="mb-8">
+          <div className="text-sm text-gray-600 mb-2">You're pre-approved for up to</div>
+          <div className="bg-gray-800 rounded-lg p-4 inline-block">
+            <div className="text-3xl font-bold text-white">{currency(preapprovedMax)}</div>
+          </div>
         </div>
-        <p className="text-xs text-gray-500">
-          You can edit this amount later.
-        </p>
-      </div>
 
-      {/* Integrated Number Pad */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {["1","2","3","4","5","6","7","8","9","0"].map(d => (
+        {/* MINI LINE OF CREDIT - Centered */}
+        <div className="text-center mb-8">
+          <div className="text-sm font-bold tracking-wide text-gray-900">MINI LINE OF CREDIT</div>
+        </div>
+
+        {/* Amount Display - Dynamic */}
+        <div className="text-center mb-8">
+          <div className="text-5xl font-bold text-gray-900 mb-2">
+            {amount === 0 ? "0" : currency(amount)}
+          </div>
+          <div className="text-sm text-gray-500 mb-2">
+            You can also edit this later.
+          </div>
+          <div className="text-sm text-gray-500">
+            {currency(minDraw)} minimum • {currency(preapprovedMax)} maximum
+          </div>
+          {amount < minDraw && amount > 0 && (
+            <div className="text-sm text-red-500 mt-2">
+              • Below minimum of {currency(minDraw)} CAD
+            </div>
+          )}
+        </div>
+
+        {/* Integrated Number Pad - Compact */}
+        <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+          {["1","2","3","4","5","6","7","8","9"].map(d => (
+            <button 
+              key={d} 
+              onClick={() => {
+                setHasUserInteracted(true);
+                let newAmount;
+                if (amount === 0) {
+                  newAmount = parseInt(d);
+                } else {
+                  newAmount = parseInt(String(amount) + d);
+                }
+                if (newAmount > preapprovedMax) newAmount = preapprovedMax;
+                setAmount(newAmount);
+              }} 
+              className="w-[100px] h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              {d}
+            </button>
+          ))}
+          <div></div>
           <button 
-            key={d} 
             onClick={() => {
               setHasUserInteracted(true);
               let newAmount;
               if (amount === 0) {
-                newAmount = parseInt(d);
+                newAmount = 0;
               } else {
-                newAmount = parseInt(String(amount) + d);
+                newAmount = parseInt(String(amount) + "0");
               }
               if (newAmount > preapprovedMax) newAmount = preapprovedMax;
               setAmount(newAmount);
             }} 
-            className="aspect-square rounded-lg border border-gray-300 text-gray-900 text-2xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-[100px] h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
           >
-            {d}
+            0
           </button>
-        ))}
-        <button 
-          onClick={() => {
-            setHasUserInteracted(true);
-            const newAmount = Math.floor(amount / 10);
-            setAmount(newAmount);
-          }} 
-          className="aspect-square rounded-lg border border-gray-300 text-gray-900 text-2xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-        >
-          ←
-        </button>
-        <button 
-          onClick={() => {
-            setHasUserInteracted(true);
-            setAmount(preapprovedMax);
-          }} 
-          className="aspect-square rounded-lg border border-gray-300 text-gray-900 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-        >
-          MAX
-        </button>
-      </div>
-
-      {/* Quick Amount Buttons */}
-      <div className="mb-6">
-        <p className="text-sm text-gray-500 mb-3">Quick amounts:</p>
-        <div className="grid grid-cols-4 gap-2">
-          {[100, 250, 500, 1000].map(quickAmount => (
-            <button
-              key={quickAmount}
-              onClick={() => {
-                setHasUserInteracted(true);
-                setAmount(quickAmount);
-              }}
-              className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-            >
-              {currency(quickAmount)}
-            </button>
-          ))}
+          <button 
+            onClick={() => {
+              setHasUserInteracted(true);
+              const newAmount = Math.floor(amount / 10);
+              setAmount(newAmount);
+            }} 
+            className="w-[100px] h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
+          >
+            ←
+          </button>
         </div>
       </div>
 
-      <button 
-        onClick={handleContinue} 
-        disabled={amount < minDraw}
-        className={`w-full rounded-lg py-4 font-semibold transition-colors ${
-          amount < minDraw
-            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-            : "bg-black text-white hover:bg-gray-800"
-        }`}
-      >
-        CONTINUE
-      </button>
+      {/* Sticky Continue Button */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6">
+        <button 
+          onClick={handleContinue} 
+          disabled={amount < minDraw}
+          className={`w-full rounded-lg py-4 font-semibold transition-colors ${
+            amount < minDraw
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-black text-white hover:bg-gray-800"
+          }`}
+        >
+          CONTINUE
+        </button>
+      </div>
     </div>
   );
 }
