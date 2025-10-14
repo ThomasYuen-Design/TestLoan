@@ -50,7 +50,7 @@ const WEEKDAYS = [
 const dayTiles = Array.from({ length: 30 }, (_, i) => (i + 1).toString());
 const LAST_DAY_TILE = "31 / Last day";
 
-export default function PaydateFlowClient({ employmentData, onBack }) {
+export default function PaydateFlowClient({ employmentData, onBack, onContinue }) {
   const [frequency, setFrequency] = useState(null);
 
   // weekly / bi-weekly
@@ -117,21 +117,21 @@ export default function PaydateFlowClient({ employmentData, onBack }) {
     }, 100);
   }
 
-  // Submit handler (for demo, just log selection)
+  // Submit handler
   function handleContinue() {
     if (!canContinue) return;
     const payload = { frequency, weekday, anchorDate: chosenRecent, semiDays, monthlyDay };
-    // eslint-disable-next-line no-console
-    console.log("Collected:", payload);
-    alert("Captured: " + JSON.stringify(payload, null, 2));
+    if (onContinue) {
+      onContinue(payload);
+    }
   }
 
   return (
     <div className="w-full max-w-md mx-auto p-5 pb-24 space-y-6 text-neutral-900">
-      <ProgressHeader currentStep={2} totalSteps={6} onBack={onBack} />
+      <ProgressHeader currentStep={2} totalSteps={4} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-2">
-        STEP 2 OF 6 – ENTERING YOUR PAY DATES
+        STEP 2 OF 4 – ENTERING YOUR PAY DATES
       </p>
 
       <p className="text-sm text-neutral-600">To set your payment schedule, tell us how you get paid.</p>

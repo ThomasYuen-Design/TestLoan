@@ -25,10 +25,10 @@ export default function Step3BankSelection({ onContinue, onBack, initialData = {
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={3} totalSteps={6} onBack={onBack} />
+      <ProgressHeader currentStep={3} totalSteps={7} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 3 OF 6 – BANK INFORMATION
+        STEP 3 OF 7 – BANK INFORMATION
       </p>
 
       <h2 className="text-lg font-semibold mb-6">

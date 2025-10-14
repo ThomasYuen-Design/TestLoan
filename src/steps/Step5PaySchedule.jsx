@@ -36,10 +36,10 @@ export default function Step5PaySchedule({ onContinue, onBack, frequency, initia
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={5} totalSteps={6} onBack={onBack} />
+      <ProgressHeader currentStep={5} totalSteps={7} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 5 OF 6 – PAY SCHEDULE
+        STEP 5 OF 7 – PAY SCHEDULE
       </p>
 
       <div>

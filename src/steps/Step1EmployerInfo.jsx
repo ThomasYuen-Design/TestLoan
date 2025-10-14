@@ -17,10 +17,10 @@ export default function Step1EmployerInfo({ onContinue, onBack, initialData = {}
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={1} totalSteps={6} onBack={onBack} />
+      <ProgressHeader currentStep={1} totalSteps={7} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 1 OF 6 – EMPLOYER INFORMATION
+        STEP 1 OF 7 – EMPLOYER INFORMATION
       </p>
 
       <h2 className="text-lg font-semibold mb-6">

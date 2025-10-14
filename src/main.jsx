@@ -4,17 +4,22 @@ import LandingPage from './LandingPage.jsx'
 import LocPortalApp from '../loc_customer_portal_active_member_mvp.jsx'
 import EmploymentInfoStep from './EmploymentInfoStep.jsx'
 import PaydateFlowClient from './PaydateFlowClient.jsx'
+import LoanCustomizationStep from './LoanCustomizationStep.jsx'
+import LoanProtectionStep from './LoanProtectionStep.jsx'
 import Step1EmployerInfo from './steps/Step1EmployerInfo.jsx'
 import Step2DirectDeposit from './steps/Step2DirectDeposit.jsx'
 import Step3BankSelection from './steps/Step3BankSelection.jsx'
 import Step4IncomeFrequency from './steps/Step4IncomeFrequency.jsx'
 import Step5PaySchedule from './steps/Step5PaySchedule.jsx'
 import Step6LastPaid from './steps/Step6LastPaid.jsx'
+import Step7LoanCustomization from './steps/Step7LoanCustomization.jsx'
 
 const App = () => {
   const [currentView, setCurrentView] = useState('landing');
   const [employmentData, setEmploymentData] = useState(null);
   const [employmentDataSteps, setEmploymentDataSteps] = useState(null);
+  const [paydateData, setPaydateData] = useState(null);
+  const [loanData, setLoanData] = useState(null);
   
   // Step-by-step flow data
   const [stepsData, setStepsData] = useState({
@@ -24,6 +29,7 @@ const App = () => {
     step4: {},
     step5: {},
     step6: {},
+    step7: {},
   });
   const [currentStepNumber, setCurrentStepNumber] = useState(1);
 
@@ -38,6 +44,7 @@ const App = () => {
         step4: {},
         step5: {},
         step6: {},
+        step7: {},
       });
     }
   };
@@ -45,6 +52,21 @@ const App = () => {
   const handleEmploymentContinue = (data) => {
     setEmploymentData(data);
     setCurrentView('paydate');
+  };
+
+  const handlePaydateContinue = (data) => {
+    setPaydateData(data);
+    setCurrentView('loan-customization');
+  };
+
+  const handleLoanCustomizationContinue = (data) => {
+    setLoanData(data);
+    setCurrentView('loan-protection');
+  };
+
+  const handleLoanProtectionContinue = (data) => {
+    // Application complete - return to landing
+    setCurrentView('landing');
   };
 
   const handleEmploymentContinueSteps = (data) => {
@@ -101,17 +123,20 @@ const App = () => {
     if (frequency === "Weekly" || frequency === "Bi-weekly") {
       setCurrentStepNumber(6);
     } else {
-      // Complete the flow
-      console.log("Complete flow data:", { ...stepsData, step5: data });
-      alert("Application complete! " + JSON.stringify({ ...stepsData, step5: data }, null, 2));
-      setCurrentView('landing');
+      // For Semi-monthly/Monthly, skip to step 7
+      setCurrentStepNumber(7);
     }
   };
 
   const handleStep6Continue = (data) => {
     setStepsData(prev => ({ ...prev, step6: data }));
-    console.log("Complete flow data:", { ...stepsData, step6: data });
-    alert("Application complete! " + JSON.stringify({ ...stepsData, step6: data }, null, 2));
+    setCurrentStepNumber(7);
+  };
+
+  const handleStep7Continue = (data) => {
+    setStepsData(prev => ({ ...prev, step7: data }));
+    console.log("Complete flow data:", { ...stepsData, step7: data });
+    alert("Application complete! " + JSON.stringify({ ...stepsData, step7: data }, null, 2));
     setCurrentView('landing');
   };
 
@@ -132,7 +157,15 @@ const App = () => {
   }
 
   if (currentView === 'paydate') {
-    return <PaydateFlowClient employmentData={employmentData} onBack={handleBackToEmployment} />;
+    return <PaydateFlowClient employmentData={employmentData} onBack={handleBackToEmployment} onContinue={handlePaydateContinue} />;
+  }
+
+  if (currentView === 'loan-customization') {
+    return <LoanCustomizationStep employmentData={employmentData} paydateData={paydateData} onBack={() => setCurrentView('paydate')} onContinue={handleLoanCustomizationContinue} />;
+  }
+
+  if (currentView === 'loan-protection') {
+    return <LoanProtectionStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-customization')} onContinue={handleLoanProtectionContinue} />;
   }
 
   if (currentView === 'application-steps') {
@@ -153,6 +186,9 @@ const App = () => {
     }
     if (currentStepNumber === 6) {
       return <Step6LastPaid onContinue={handleStep6Continue} onBack={handleStepBack} frequency={stepsData.step4.frequency} weekday={stepsData.step5.weekday} initialData={stepsData.step6} />;
+    }
+    if (currentStepNumber === 7) {
+      return <Step7LoanCustomization onContinue={handleStep7Continue} onBack={handleStepBack} initialData={stepsData.step7} />;
     }
   }
 

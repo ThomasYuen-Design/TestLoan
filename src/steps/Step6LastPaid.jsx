@@ -35,10 +35,10 @@ export default function Step6LastPaid({ onContinue, onBack, frequency, weekday, 
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={6} totalSteps={6} onBack={onBack} />
+      <ProgressHeader currentStep={6} totalSteps={7} onBack={onBack} />
 
       <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 6 OF 6 – LAST PAYDAY
+        STEP 6 OF 7 – LAST PAYDAY
       </p>
 
       <div>
