@@ -6,6 +6,9 @@ import EmploymentInfoStep from './EmploymentInfoStep.jsx'
 import PaydateFlowClient from './PaydateFlowClient.jsx'
 import LoanCustomizationStep from './LoanCustomizationStep.jsx'
 import LoanProtectionStep from './LoanProtectionStep.jsx'
+import FundingOptionsStep from './FundingOptionsStep.jsx'
+import BankLinkingStep from './BankLinkingStep.jsx'
+import CheckoutStep from './CheckoutStep.jsx'
 import Step1EmployerInfo from './steps/Step1EmployerInfo.jsx'
 import Step2DirectDeposit from './steps/Step2DirectDeposit.jsx'
 import Step3BankSelection from './steps/Step3BankSelection.jsx'
@@ -20,6 +23,7 @@ const App = () => {
   const [employmentDataSteps, setEmploymentDataSteps] = useState(null);
   const [paydateData, setPaydateData] = useState(null);
   const [loanData, setLoanData] = useState(null);
+  const [fundingData, setFundingData] = useState(null);
   
   // Step-by-step flow data
   const [stepsData, setStepsData] = useState({
@@ -65,7 +69,22 @@ const App = () => {
   };
 
   const handleLoanProtectionContinue = (data) => {
-    // Application complete - return to landing
+    setCurrentView('funding-options');
+  };
+
+  const handleFundingOptionsContinue = (data) => {
+    setFundingData(data);
+    setCurrentView('bank-linking');
+  };
+
+  const handleBankLinkingContinue = () => {
+    // Proceed to checkout after bank linking
+    setCurrentView('checkout');
+  };
+
+  const handleCheckoutContinue = () => {
+    // Application complete
+    alert("Application complete! Your Mini Line of Credit has been approved and will be available shortly.");
     setCurrentView('landing');
   };
 
@@ -166,6 +185,18 @@ const App = () => {
 
   if (currentView === 'loan-protection') {
     return <LoanProtectionStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-customization')} onContinue={handleLoanProtectionContinue} />;
+  }
+
+  if (currentView === 'funding-options') {
+    return <FundingOptionsStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-protection')} onContinue={handleFundingOptionsContinue} />;
+  }
+
+  if (currentView === 'bank-linking') {
+    return <BankLinkingStep onBack={() => setCurrentView('funding-options')} onContinue={handleBankLinkingContinue} />;
+  }
+
+  if (currentView === 'checkout') {
+    return <CheckoutStep loanData={loanData} fundingData={fundingData} onBack={() => setCurrentView('bank-linking')} onContinue={handleCheckoutContinue} />;
   }
 
   if (currentView === 'application-steps') {

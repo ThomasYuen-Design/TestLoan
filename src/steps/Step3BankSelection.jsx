@@ -24,39 +24,43 @@ export default function Step3BankSelection({ onContinue, onBack, initialData = {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={3} totalSteps={7} onBack={onBack} />
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 md:p-8 lg:p-10 pb-24">
+      <div className="max-w-2xl mx-auto w-full">
+        <ProgressHeader currentStep={3} totalSteps={7} onBack={onBack} />
 
-      <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 3 OF 7 – BANK INFORMATION
-      </p>
+        <p className="text-xs tracking-wide text-gray-500 mb-8">
+          STEP 3 OF 7 – BANK INFORMATION
+        </p>
 
-      <h2 className="text-lg font-semibold mb-6">
-        WHERE IS YOUR PAYROLL/INCOME DEPOSITED?
-      </h2>
+        <h2 className="text-lg font-semibold mb-6">
+          WHERE IS YOUR PAYROLL/INCOME DEPOSITED?
+        </h2>
 
-      <div className="space-y-3">
-        {banks.map((b) => (
-          <label 
-            key={b}
-            className={`flex items-center justify-between px-4 py-4 rounded-lg cursor-pointer transition-colors ${
-              bank === b ? "bg-black text-white" : "bg-gray-50 hover:bg-gray-100"
-            }`}
-          >
-            <span className="text-lg">{b}</span>
-            <input
-              type="radio"
-              name="bank"
-              value={b}
-              checked={bank === b}
-              onChange={(e) => setBank(e.target.value)}
-              className="w-5 h-5"
-            />
-          </label>
-        ))}
+        <div className="space-y-3">
+          {banks.map((b) => (
+            <label 
+              key={b}
+              className={`flex items-center justify-between px-4 py-4 rounded-lg cursor-pointer transition-colors ${
+                bank === b ? "bg-black text-white" : "bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <span className="text-lg">{b}</span>
+              <input
+                type="radio"
+                name="bank"
+                value={b}
+                checked={bank === b}
+                onChange={(e) => setBank(e.target.value)}
+                className="w-5 h-5"
+              />
+            </label>
+          ))}
+        </div>
+
+        <div className="max-w-md mx-auto mt-6">
+          <ContinueButton onClick={handleContinue} disabled={!isComplete} />
+        </div>
       </div>
-
-      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }

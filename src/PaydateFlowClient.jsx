@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { Info } from "lucide-react";
+import { Info, Lock, MessageCircle, Shield } from "lucide-react";
 import ProgressHeader from "./components/ProgressHeader.jsx";
 import ContinueButton from "./components/ContinueButton.jsx";
 
@@ -127,188 +127,267 @@ export default function PaydateFlowClient({ employmentData, onBack, onContinue }
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-5 pb-24 space-y-6 text-neutral-900">
-      <ProgressHeader currentStep={2} totalSteps={4} onBack={onBack} />
+    <div className="min-h-screen bg-white text-black flex flex-col">
+      {/* Main Content */}
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-10">
+          <ProgressHeader currentStep={2} totalSteps={6} onBack={onBack} />
 
-      <p className="text-xs tracking-wide text-gray-500 mb-2">
-        STEP 2 OF 4 – ENTERING YOUR PAY DATES
-      </p>
+          <p className="text-xs tracking-wide text-gray-500 mb-8">
+            STEP 2 OF 6 – YOUR PAY DATES
+          </p>
 
-      <p className="text-sm text-neutral-600">To set your payment schedule, tell us how you get paid.</p>
-
-      {/* 1) Frequency */}
-      <section className="space-y-3">
-        <div className="text-sm font-semibold">What's your income frequency?</div>
-        <div className="grid grid-cols-1 gap-2">
-          {FREQUENCIES.map((f) => (
-            <button
-              key={f}
-              onClick={() => onPickFrequency(f)}
-              className={`text-left rounded-xl px-4 py-3 border hover:bg-neutral-50 ${
-                frequency === f ? "border-neutral-900" : "border-neutral-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="font-semibold">{f}</div>
-                <div className={`h-4 w-4 rounded-full border ${frequency === f ? "bg-neutral-900" : ""}`} />
-              </div>
-              <p className="text-xs text-neutral-600 mt-1">
-                {f === "Weekly" && "You're paid once a week on the same weekday."}
-                {f === "Bi-weekly" && "You're paid every two weeks on the same weekday."}
-                {f === "Semi-monthly" && "You're paid twice a month on fixed dates (e.g., 15th & last day)."}
-                {f === "Monthly" && "You're paid once a month on a specific date."}
-              </p>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* 2) Frequency-specific prompts */}
-      {frequency && (
-        <section className="space-y-4" data-block="frequency-specific">
-          {/* Info rule (implicit holiday/weekend policy) */}
-          <div className="flex items-start gap-2 text-xs text-neutral-600">
-            <Info className="h-4 w-4 mt-0.5" />
-            <span>
-              If a payday falls on a weekend or holiday, we'll set your payment to the <strong>last business day before</strong> your payday.
-            </span>
-          </div>
-
-          
-
-          {/* Weekly & Bi-weekly: weekday chips, then recent-date choice */}
-          {(frequency === "Weekly" || frequency === "Bi-weekly") && (
-            <div className="space-y-3" ref={weekdaySectionRef}>
-              <div className="text-sm font-semibold">Which weekday do you get paid?</div>
-              <div className="flex gap-2">
-                {WEEKDAYS.map((d) => (
-                  <button
-                    key={d.value}
-                    onClick={() => {
-                      setWeekday(d.value);
-                      setChosenRecent(null);
-                      // Scroll to recent dates section after selecting weekday
-                      setTimeout(() => {
-                        recentDatesSectionRef.current?.scrollIntoView({ 
-                          behavior: 'smooth', 
-                          block: 'start',
-                          inline: 'nearest'
-                        });
-                      }, 100);
-                    }}
-                    className={`px-3 py-2 rounded-full border text-sm ${
-                      weekday === d.value ? "border-neutral-900" : "border-neutral-300"
-                    }`}
-                  >
-                    {d.label}
-                  </button>
-                ))}
-              </div>
-
-              {weekday && (
-                <div className="space-y-2" ref={recentDatesSectionRef}>
-                  <div className="text-sm font-semibold">
-                    {frequency === "Weekly" ? "Choose your pay cycle for repayments" : "Which date were you last paid?"}
-                  </div>
-                  <div className="flex gap-2">
-                    {recentDates.map((d) => (
-                      <button
-                        key={d}
-                        onClick={() => setChosenRecent(d)}
-                        className={`px-3 py-2 rounded-xl border text-sm ${
-                          chosenRecent === d ? "border-neutral-900" : "border-neutral-300"
-                        }`}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
-                  {frequency === "Weekly" && (
-                  <p className="text-xs text-neutral-500">
-                    Your repayments will be scheduled <strong>every two weeks</strong> from the date you choose.
-                  </p>
-                )}
+          <div className="grid lg:grid-cols-[1fr,400px] gap-8">
+            {/* Left Column - Main Form */}
+            <div className="space-y-8">
+              {/* 1) Frequency */}
+              <section className="space-y-4">
+                <h2 className="text-lg font-semibold">PAYROLL/INCOME FREQUENCY</h2>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {FREQUENCIES.map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => onPickFrequency(f)}
+                      className={`text-left rounded-lg px-4 py-3 border transition-colors ${
+                        frequency === f ? "border-black bg-gray-50" : "border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-semibold uppercase text-sm">{f}</div>
+                        <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                          frequency === f ? "border-black" : "border-gray-400"
+                        }`}>
+                          {frequency === f && <div className="h-3 w-3 rounded-full bg-black" />}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        {f === "Weekly" && "You're paid once a week on the same weekday."}
+                        {f === "Bi-weekly" && "You're paid every two weeks on the same weekday."}
+                        {f === "Semi-monthly" && "You're paid twice a month (e.g. 15th and 31 / Last Day of the Month)"}
+                        {f === "Monthly" && "You're paid once a month"}
+                      </p>
+                    </button>
+                  ))}
                 </div>
+              </section>
+
+              {/* 2) Frequency-specific prompts */}
+              {frequency && (
+                <section className="space-y-6" data-block="frequency-specific">
+                  {/* Weekly & Bi-weekly: weekday chips, then recent-date choice */}
+                  {(frequency === "Weekly" || frequency === "Bi-weekly") && (
+                    <>
+                      <div className="space-y-3" ref={weekdaySectionRef}>
+                        <h3 className="text-base font-semibold">WHICH WEEKDAY DO YOU GET PAID?</h3>
+                        <div className="flex gap-2">
+                          {WEEKDAYS.map((d) => (
+                            <button
+                              key={d.value}
+                              onClick={() => {
+                                setWeekday(d.value);
+                                setChosenRecent(null);
+                                setTimeout(() => {
+                                  recentDatesSectionRef.current?.scrollIntoView({ 
+                                    behavior: 'smooth', 
+                                    block: 'start',
+                                    inline: 'nearest'
+                                  });
+                                }, 100);
+                              }}
+                              className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                                weekday === d.value ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                              }`}
+                            >
+                              {d.label.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {weekday && (
+                        <div className="space-y-3" ref={recentDatesSectionRef}>
+                          <p className="text-sm font-medium uppercase">
+                            YOUR LINE OF CREDIT PAYMENTS WILL BE EVERY TWO WEEKS, STARTING FROM THE PAYDAY YOU SELECT.
+                          </p>
+                          <div className="flex gap-3">
+                            {recentDates.map((d) => (
+                              <button
+                                key={d}
+                                onClick={() => setChosenRecent(d)}
+                                className={`flex-1 px-6 py-4 rounded-lg text-base font-medium transition-colors ${
+                                  chosenRecent === d ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                                }`}
+                              >
+                                {d}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Semi-monthly: pick two days */}
+                  {frequency === "Semi-monthly" && (
+                    <div className="space-y-3" ref={semiMonthlySectionRef}>
+                      <h3 className="text-base font-semibold">SELECT THE TWO DAYS YOU'RE PAID EVERY MONTH</h3>
+                      <div className="grid grid-cols-5 md:grid-cols-6 gap-2">
+                        {dayTiles.map((d) => (
+                          <button
+                            key={d}
+                            onClick={() => {
+                              setSemiDays((prev) => {
+                                const exists = prev.includes(d);
+                                if (exists) return prev.filter((x) => x !== d);
+                                if (prev.length >= 2) return prev;
+                                return [...prev, d];
+                              });
+                            }}
+                            className={`py-3 rounded-lg text-sm font-medium transition-colors ${
+                              semiDays.includes(d) ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                            }`}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => {
+                            setSemiDays((prev) => {
+                              const exists = prev.includes(LAST_DAY_TILE);
+                              if (exists) return prev.filter((x) => x !== LAST_DAY_TILE);
+                              if (prev.length >= 2) return prev;
+                              return [...prev, LAST_DAY_TILE];
+                            });
+                          }}
+                          className={`py-3 rounded-lg text-xs col-span-2 font-medium transition-colors ${
+                            semiDays.includes(LAST_DAY_TILE) ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                          }`}
+                        >
+                          {LAST_DAY_TILE}
+                        </button>
+                      </div>
+                      <div className="text-xs text-gray-600 mt-2">Selected: {semiDays.join(" • ") || "—"}</div>
+                    </div>
+                  )}
+
+                  {/* Monthly: pick one day */}
+                  {frequency === "Monthly" && (
+                    <div className="space-y-3" ref={monthlySectionRef}>
+                      <h3 className="text-base font-semibold">SELECT THE DAY YOU'RE PAID EVERY MONTH</h3>
+                      <div className="grid grid-cols-5 md:grid-cols-6 gap-2">
+                        {dayTiles.map((d) => (
+                          <button
+                            key={d}
+                            onClick={() => setMonthlyDay(d)}
+                            className={`py-3 rounded-lg text-sm font-medium transition-colors ${
+                              monthlyDay === d ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                            }`}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setMonthlyDay(LAST_DAY_TILE)}
+                          className={`py-3 rounded-lg text-xs col-span-2 font-medium transition-colors ${
+                            monthlyDay === LAST_DAY_TILE ? "bg-black text-white" : "bg-gray-100 text-black hover:bg-gray-200"
+                          }`}
+                        >
+                          {LAST_DAY_TILE}
+                        </button>
+                      </div>
+                      <div className="text-xs text-gray-600 mt-2">Selected: {monthlyDay || "—"}</div>
+                    </div>
+                  )}
+                </section>
               )}
             </div>
-          )}
 
-          {/* Semi-monthly: pick two days */}
-          {frequency === "Semi-monthly" && (
-            <div className="space-y-3" ref={semiMonthlySectionRef}>
-              <div className="text-sm font-semibold">Select the two days you're paid every month</div>
-              <div className="grid grid-cols-5 gap-2">
-                {dayTiles.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => {
-                      setSemiDays((prev) => {
-                        const exists = prev.includes(d);
-                        if (exists) return prev.filter((x) => x !== d);
-                        if (prev.length >= 2) return prev; // limit 2
-                        return [...prev, d];
-                      });
-                    }}
-                    className={`rounded-lg border py-2 text-sm ${
-                      semiDays.includes(d) ? "border-neutral-900" : "border-neutral-300"
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
+            {/* Right Column - Info Panel */}
+            <div className="lg:sticky lg:top-8 lg:self-start">
+              <div className="bg-gray-100 rounded-lg p-6 space-y-6">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    If your payday falls on a weekend or holiday, both your pay and your Line of Credit payment move to the business day before.
+                  </p>
+                </div>
+                
                 <button
-                  onClick={() => {
-                    setSemiDays((prev) => {
-                      const exists = prev.includes(LAST_DAY_TILE);
-                      if (exists) return prev.filter((x) => x !== LAST_DAY_TILE);
-                      if (prev.length >= 2) return prev;
-                      return [...prev, LAST_DAY_TILE];
-                    });
-                  }}
-                  className={`rounded-lg border py-2 text-xs col-span-2 ${
-                    semiDays.includes(LAST_DAY_TILE) ? "border-neutral-900" : "border-neutral-300"
+                  onClick={handleContinue}
+                  disabled={!canContinue}
+                  className={`w-full rounded-lg py-4 font-semibold transition-colors ${
+                    !canContinue
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-black text-white hover:bg-gray-800"
                   }`}
                 >
-                  {LAST_DAY_TILE}
+                  CONTINUE
                 </button>
               </div>
-              <div className="text-xs text-neutral-500">Selected: {semiDays.join(" • ") || "—"}</div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
 
-          {/* Monthly: pick one day */}
-          {frequency === "Monthly" && (
-            <div className="space-y-3" ref={monthlySectionRef}>
-              <div className="text-sm font-semibold">Select the day you're paid every month</div>
-              <div className="grid grid-cols-5 gap-2">
-                {dayTiles.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setMonthlyDay(d)}
-                    className={`rounded-lg border py-2 text-sm ${
-                      monthlyDay === d ? "border-neutral-900" : "border-neutral-300"
-                    }`}
-                  >
-                    {d}
-                  </button>
+      {/* Footer */}
+      <footer className="bg-black text-white py-8 px-6 md:px-8 lg:px-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-6">
+            {/* Left Column */}
+            <div>
+              <div className="mb-4">
+                <a href="#" className="text-white hover:underline text-sm">Privacy Policy</a>
+                {" | "}
+                <a href="#" className="text-white hover:underline text-sm">Terms</a>
+              </div>
+              <p className="text-xs text-gray-400">
+                ©2025 Mogo Finance Technology Inc. All rights reserved.
+              </p>
+            </div>
+
+            {/* Middle Column - Testimonial */}
+            <div>
+              <div className="flex gap-1 mb-2">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-green-500">★</span>
                 ))}
-                <button
-                  onClick={() => setMonthlyDay(LAST_DAY_TILE)}
-                  className={`rounded-lg border py-2 text-xs col-span-2 ${
-                    monthlyDay === LAST_DAY_TILE ? "border-neutral-900" : "border-neutral-300"
-                  }`}
-                >
-                  {LAST_DAY_TILE}
-                </button>
               </div>
-              <div className="text-xs text-neutral-500">Selected: {monthlyDay || "—"}</div>
+              <p className="text-sm mb-2">
+                "Experienced people that are doing an excellent job. Easy quick service."
+              </p>
+              <p className="text-xs text-gray-400">Heather B</p>
+              <p className="text-xs text-gray-500">Jul 18, 2025</p>
             </div>
-          )}
-        </section>
-      )}
 
-      {/* CTA */}
-      <ContinueButton onClick={handleContinue} disabled={!canContinue} children="Continue" />
+            {/* Right Column - Security Badge */}
+            <div>
+              <div className="bg-white text-black rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-2">
+                  <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold mb-1">
+                      SINCE 2003, MORE THAN 2M CANADIANS HAVE JOINED MOGO.
+                    </p>
+                    <p className="text-xs">
+                      Your privacy and security come first — every step of the way.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Licensing Info */}
+          <div className="text-xs text-gray-500 text-center md:text-left">
+            Mogo Financial Inc. holds high-cost credit licences where required: BC 83658 | AB 349152 | MB 66167
+          </div>
+        </div>
+
+        {/* Chat Button */}
+        <button className="fixed bottom-6 right-6 bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 shadow-lg transition-colors">
+          <MessageCircle className="w-6 h-6" />
+        </button>
+      </footer>
     </div>
   );
 }

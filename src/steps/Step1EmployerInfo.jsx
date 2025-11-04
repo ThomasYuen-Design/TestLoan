@@ -16,53 +16,59 @@ export default function Step1EmployerInfo({ onContinue, onBack, initialData = {}
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={1} totalSteps={7} onBack={onBack} />
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 md:p-8 lg:p-10 pb-24">
+      <div className="max-w-2xl mx-auto w-full">
+        <ProgressHeader currentStep={1} totalSteps={7} onBack={onBack} />
 
-      <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 1 OF 7 – EMPLOYER INFORMATION
-      </p>
+        <p className="text-xs tracking-wide text-gray-500 mb-8">
+          STEP 1 OF 7 – EMPLOYER INFORMATION
+        </p>
 
-      <h2 className="text-lg font-semibold mb-6">
-        EMPLOYMENT INFO / SOURCE OF INCOME
-      </h2>
+        <h2 className="text-lg font-semibold mb-6">
+          EMPLOYMENT INFO / SOURCE OF INCOME
+        </h2>
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm mb-1 font-medium">EMPLOYER NAME</label>
-          <input
-            type="text"
-            value={employerName}
-            onChange={(e) => setEmployerName(e.target.value)}
-            placeholder="Type here..."
-            className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm mb-1 font-medium">EMPLOYER NAME</label>
+            <input
+              type="text"
+              value={employerName}
+              onChange={(e) => setEmployerName(e.target.value)}
+              placeholder="Type here..."
+              className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            />
+          </div>
+
+          <div className="md:grid md:grid-cols-2 md:gap-4 space-y-4 md:space-y-0">
+            <div>
+              <label className="block text-sm mb-1 font-medium">EMPLOYER PHONE</label>
+              <input
+                type="tel"
+                value={employerPhone}
+                onChange={(e) => setEmployerPhone(e.target.value)}
+                placeholder="e.g. (555) 123-4567"
+                className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1 font-medium">EXTENSION (OPTIONAL)</label>
+              <input
+                type="text"
+                value={extension}
+                onChange={(e) => setExtension(e.target.value)}
+                placeholder="e.g. 101"
+                className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm mb-1 font-medium">EMPLOYER PHONE</label>
-          <input
-            type="tel"
-            value={employerPhone}
-            onChange={(e) => setEmployerPhone(e.target.value)}
-            placeholder="e.g. (555) 123-4567"
-            className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1 font-medium">EXTENSION (OPTIONAL)</label>
-          <input
-            type="text"
-            value={extension}
-            onChange={(e) => setExtension(e.target.value)}
-            placeholder="e.g. 101"
-            className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-          />
+        <div className="max-w-md mx-auto mt-6">
+          <ContinueButton onClick={handleContinue} disabled={!isComplete} />
         </div>
       </div>
-
-      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }

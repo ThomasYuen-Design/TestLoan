@@ -34,48 +34,52 @@ export default function Step6LastPaid({ onContinue, onBack, frequency, weekday, 
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col p-6 pb-24">
-      <ProgressHeader currentStep={6} totalSteps={7} onBack={onBack} />
+    <div className="min-h-screen bg-white text-black flex flex-col p-6 md:p-8 lg:p-10 pb-24">
+      <div className="max-w-2xl mx-auto w-full">
+        <ProgressHeader currentStep={6} totalSteps={7} onBack={onBack} />
 
-      <p className="text-xs tracking-wide text-gray-500 mb-8">
-        STEP 6 OF 7 – LAST PAYDAY
-      </p>
-
-      <div>
-        <h2 className="text-lg font-semibold mb-2">
-          {frequency === "Weekly" ? "Choose your pay cycle for repayments" : "Which date were you last paid?"}
-        </h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Select the most recent date you received payment.
+        <p className="text-xs tracking-wide text-gray-500 mb-8">
+          STEP 6 OF 7 – LAST PAYDAY
         </p>
 
-        <div className="space-y-3">
-          {recentDates.map((d) => (
-            <button
-              key={d}
-              onClick={() => setChosenRecent(d)}
-              className={`w-full px-4 py-4 rounded-xl border text-left transition-colors ${
-                chosenRecent === d ? "border-black bg-black text-white" : "border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">{d}</span>
-                <div className={`h-5 w-5 rounded-full border-2 ${chosenRecent === d ? "bg-white border-white" : "border-gray-400"}`} />
-              </div>
-            </button>
-          ))}
+        <div>
+          <h2 className="text-lg font-semibold mb-2">
+            {frequency === "Weekly" ? "Choose your pay cycle for repayments" : "Which date were you last paid?"}
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Select the most recent date you received payment.
+          </p>
+
+          <div className="space-y-3">
+            {recentDates.map((d) => (
+              <button
+                key={d}
+                onClick={() => setChosenRecent(d)}
+                className={`w-full px-4 py-4 rounded-xl border text-left transition-colors ${
+                  chosenRecent === d ? "border-black bg-black text-white" : "border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium">{d}</span>
+                  <div className={`h-5 w-5 rounded-full border-2 ${chosenRecent === d ? "bg-white border-white" : "border-gray-400"}`} />
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {frequency === "Weekly" && (
+            <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+              <p className="text-xs text-neutral-600">
+                Your repayments will be scheduled <strong>every two weeks</strong> from the date you choose.
+              </p>
+            </div>
+          )}
         </div>
 
-        {frequency === "Weekly" && (
-          <div className="mt-6 bg-blue-50 p-4 rounded-lg">
-            <p className="text-xs text-neutral-600">
-              Your repayments will be scheduled <strong>every two weeks</strong> from the date you choose.
-            </p>
-          </div>
-        )}
+        <div className="max-w-md mx-auto mt-6">
+          <ContinueButton onClick={handleContinue} disabled={!isComplete} />
+        </div>
       </div>
-
-      <ContinueButton onClick={handleContinue} disabled={!isComplete} />
     </div>
   );
 }
