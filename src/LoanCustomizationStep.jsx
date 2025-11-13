@@ -172,8 +172,8 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
               </div>
             </div>
 
-            {/* Right Column - Protection Panel */}
-            <div className="lg:sticky lg:top-8 lg:self-start">
+            {/* Right Column - Protection Panel (Desktop Only) */}
+            <div className="hidden lg:block lg:sticky lg:top-8 lg:self-start">
               <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                 <h3 className="text-base font-bold tracking-wide">
                   LINE OF CREDIT PROTECTION
