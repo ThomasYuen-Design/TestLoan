@@ -35,10 +35,10 @@ export default function BankLinkingStep({ onContinue, onBack }) {
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-10">
-          <ProgressHeader currentStep={6} totalSteps={7} onBack={onBack} />
+          <ProgressHeader currentStep={5} totalSteps={6} onBack={onBack} />
 
           <p className="text-xs tracking-wide text-gray-500 mb-8">
-            STEP 6 OF 7 – BANK ACCOUNT INFO
+            STEP 5 OF 6 – BANK ACCOUNT INFO
           </p>
 
           <div className="grid lg:grid-cols-[1fr,400px] gap-8">

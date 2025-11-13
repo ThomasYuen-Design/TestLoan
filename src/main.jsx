@@ -5,7 +5,6 @@ import LocPortalApp from '../loc_customer_portal_active_member_mvp.jsx'
 import EmploymentInfoStep from './EmploymentInfoStep.jsx'
 import PaydateFlowClient from './PaydateFlowClient.jsx'
 import LoanCustomizationStep from './LoanCustomizationStep.jsx'
-import LoanProtectionStep from './LoanProtectionStep.jsx'
 import FundingOptionsStep from './FundingOptionsStep.jsx'
 import BankLinkingStep from './BankLinkingStep.jsx'
 import CheckoutStep from './CheckoutStep.jsx'
@@ -65,10 +64,6 @@ const App = () => {
 
   const handleLoanCustomizationContinue = (data) => {
     setLoanData(data);
-    setCurrentView('loan-protection');
-  };
-
-  const handleLoanProtectionContinue = (data) => {
     setCurrentView('funding-options');
   };
 
@@ -183,12 +178,8 @@ const App = () => {
     return <LoanCustomizationStep employmentData={employmentData} paydateData={paydateData} onBack={() => setCurrentView('paydate')} onContinue={handleLoanCustomizationContinue} />;
   }
 
-  if (currentView === 'loan-protection') {
-    return <LoanProtectionStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-customization')} onContinue={handleLoanProtectionContinue} />;
-  }
-
   if (currentView === 'funding-options') {
-    return <FundingOptionsStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-protection')} onContinue={handleFundingOptionsContinue} />;
+    return <FundingOptionsStep employmentData={employmentData} paydateData={paydateData} loanData={loanData} onBack={() => setCurrentView('loan-customization')} onContinue={handleFundingOptionsContinue} />;
   }
 
   if (currentView === 'bank-linking') {

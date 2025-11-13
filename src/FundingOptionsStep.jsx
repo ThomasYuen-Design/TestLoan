@@ -23,10 +23,10 @@ export default function FundingOptionsStep({ onContinue, onBack, initialData = {
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-10">
-          <ProgressHeader currentStep={5} totalSteps={6} onBack={onBack} />
+          <ProgressHeader currentStep={4} totalSteps={6} onBack={onBack} />
 
           <p className="text-xs tracking-wide text-gray-500 mb-2">
-            STEP 5 OF 6 – FUNDING OPTIONS
+            STEP 4 OF 6 – FUNDING OPTIONS
           </p>
 
           <p className="text-sm text-gray-700 mb-8">

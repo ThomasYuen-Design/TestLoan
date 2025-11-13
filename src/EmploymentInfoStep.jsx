@@ -28,7 +28,7 @@ export default function EmploymentInfoStep({ onContinue, onBack }) {
           <ProgressHeader currentStep={1} totalSteps={6} onBack={onBack} />
 
           <p className="text-xs tracking-wide text-gray-500 mb-8">
-            STEP 1 OF 6 – ADDITIONAL INFO
+            STEP 1 OF 6 – EMPLOYMENT INFO
           </p>
 
           <div className="max-w-3xl">

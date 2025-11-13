@@ -134,7 +134,7 @@ export default function PaydateFlowClient({ employmentData, onBack, onContinue }
           <ProgressHeader currentStep={2} totalSteps={6} onBack={onBack} />
 
           <p className="text-xs tracking-wide text-gray-500 mb-8">
-            STEP 2 OF 6 – YOUR PAY DATES
+            STEP 2 OF 6 – PAY DATES
           </p>
 
           <div className="grid lg:grid-cols-[1fr,400px] gap-8">

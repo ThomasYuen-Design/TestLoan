@@ -4,10 +4,11 @@ import ContinueButton from "./components/ContinueButton.jsx";
 import { Lock, MessageCircle, Edit } from "lucide-react";
 
 /**
- * Loan Customization Step - Responsive Design
- * - Desktop: Direct input with keyboard
- * - Mobile: Interactive number pad for selecting loan amount
+ * Loan Customization Step - Merged with Protection
+ * - Desktop: Direct input with keyboard, 2-column layout with protection in sidebar
+ * - Mobile: Interactive number pad for selecting loan amount, single column
  * - Minimum amount selectable is $100, maximum = pre-approval
+ * - Includes Line of Credit Protection option
  */
 
 // Utility helpers
@@ -26,6 +27,7 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
   const [amount, setAmount] = useState(initialData.amount || preapprovedMax);
   const [inputValue, setInputValue] = useState(String(initialData.amount || preapprovedMax));
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [loanProtection, setLoanProtection] = useState(initialData.loanProtection || false);
 
   const apr = 47.42;
 
@@ -46,7 +48,8 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
     const loanData = {
       amount,
       preapprovedMax,
-      apr
+      apr,
+      loanProtection
     };
     
     if (onContinue) {
@@ -65,7 +68,7 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
             STEP 3 OF 6 – LINE OF CREDIT AMOUNT
           </p>
 
-          <div className="grid lg:grid-cols-[1fr,400px] gap-8">
+          <div className="grid lg:grid-cols-[1fr,450px] gap-8">
             {/* Left Column - Main Form */}
             <div className="space-y-6">
               {/* Pre-approval Info */}
@@ -78,7 +81,7 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
 
               {/* MINI LINE OF CREDIT */}
               <div>
-                <div className="text-sm text-gray-600 mb-3">MINI LINE OF CREDIT</div>
+                <h2 className="text-lg font-semibold mb-3">MINI LINE OF CREDIT</h2>
                 
                 {/* Desktop: Direct Input */}
                 <div className="hidden lg:block">
@@ -106,16 +109,32 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
                   )}
                 </div>
 
-                {/* Mobile: Number Pad */}
+                {/* Mobile: Native Keyboard Input */}
                 <div className="lg:hidden">
                   <div className="text-center mb-6">
-                    <div className="text-5xl font-bold text-gray-900 mb-2">
-                      {amount === 0 ? "0" : currency(amount)}
+                    <p className="text-sm text-gray-600 mb-2">Tap amount to edit</p>
+                    <div className="relative">
+                      <span className="text-5xl font-bold text-gray-900">$</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={amount}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          const clamped = Math.min(val, preapprovedMax);
+                          setAmount(clamped);
+                          setInputValue(String(clamped));
+                          setHasUserInteracted(true);
+                        }}
+                        className="text-5xl font-bold text-gray-900 text-center w-full border-0 focus:outline-none focus:ring-2 focus:ring-black focus:rounded-lg bg-transparent px-2"
+                        style={{ appearance: 'textfield' }}
+                      />
                     </div>
-                    <div className="text-sm text-gray-500 mb-2">
+                    <div className="text-sm text-gray-500 mt-2">
                       You can also edit this later.
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 mt-1">
                       {currency(minDraw)} minimum • {currency(preapprovedMax)} maximum
                     </div>
                     {amount < minDraw && amount > 0 && (
@@ -124,80 +143,70 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
                       </div>
                     )}
                   </div>
-
-                  {/* Number Pad */}
-                  <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-                    {["1","2","3","4","5","6","7","8","9"].map(d => (
-                      <button 
-                        key={d} 
-                        onClick={() => {
-                          setHasUserInteracted(true);
-                          let newAmount;
-                          if (amount === 0) {
-                            newAmount = parseInt(d);
-                          } else {
-                            newAmount = parseInt(String(amount) + d);
-                          }
-                          if (newAmount > preapprovedMax) newAmount = preapprovedMax;
-                          setAmount(newAmount);
-                          setInputValue(String(newAmount));
-                        }} 
-                        className="w-full h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-                      >
-                        {d}
-                      </button>
-                    ))}
-                    <div></div>
-                    <button 
-                      onClick={() => {
-                        setHasUserInteracted(true);
-                        let newAmount;
-                        if (amount === 0) {
-                          newAmount = 0;
-                        } else {
-                          newAmount = parseInt(String(amount) + "0");
-                        }
-                        if (newAmount > preapprovedMax) newAmount = preapprovedMax;
-                        setAmount(newAmount);
-                        setInputValue(String(newAmount));
-                      }} 
-                      className="w-full h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-                    >
-                      0
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setHasUserInteracted(true);
-                        const newAmount = Math.floor(amount / 10);
-                        setAmount(newAmount);
-                        setInputValue(String(newAmount));
-                      }} 
-                      className="w-full h-[44px] rounded-lg border border-gray-300 text-gray-900 text-xl font-medium hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-black"
-                    >
-                      ←
-                    </button>
-                  </div>
                 </div>
+              </div>
+
+              {/* MINI LINE OF CREDIT FEATURES */}
+              <div className="pt-6">
+                <h3 className="text-lg font-bold tracking-wide mb-4">
+                  MINI LINE OF CREDIT FEATURES
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <span className="text-black mt-1">•</span>
+                    <span className="text-base">Flexible payments, not fixed payments</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-black mt-1">•</span>
+                    <span className="text-base">Borrow only what you need</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-black mt-1">•</span>
+                    <span className="text-base">Repay anytime without penalties</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-black mt-1">•</span>
+                    <span className="text-base">Whatever you pay down becomes available again in your Mogo account</span>
+                  </li>
+                </ul>
               </div>
             </div>
 
-            {/* Right Column - Summary Panel */}
+            {/* Right Column - Protection Panel */}
             <div className="lg:sticky lg:top-8 lg:self-start">
               <div className="border border-gray-300 rounded-lg p-6 space-y-4">
-                <h3 className="text-lg font-bold">SUMMARY</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">PRE-APPROVED</span>
-                    <span className="font-semibold">{currency(preapprovedMax)}</span>
+                <h3 className="text-base font-bold tracking-wide">
+                  LINE OF CREDIT PROTECTION
+                </h3>
+
+                {/* Checkbox */}
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-5 w-5 accent-black cursor-pointer"
+                    checked={loanProtection}
+                    onChange={(e) => setLoanProtection(e.target.checked)}
+                  />
+                  <div className="text-sm">
+                    Please present me with the features & benefits of the optional Line of Credit Balance Protection Plan.
                   </div>
-                  
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">ADVANCE AMOUNT</span>
-                    <span className="font-semibold">{currency(amount)}</span>
-                  </div>
+                </label>
+
+                {/* Description */}
+                <div className="space-y-3 text-sm text-gray-900">
+                  <p>
+                    Mogo strongly recommends protecting your line of credit. Protect yourself and your loved ones in the event that you are laid off, injured, critically ill or pass away and can't repay your debt. Coverage also includes Lifetime Milestones and Unpaid Family Leave.{' '}
+                    <button className="text-blue-600 underline hover:text-blue-800">
+                      Learn more
+                    </button>
+                  </p>
+
+                  <p className="text-xs text-gray-700">
+                    The optional Line of Credit Protection Plan is a Credit Group Insurance Plan Underwritten by Canadian Premier Life Insurance Company and Canadian Premier General Insurance Company.
+                  </p>
                 </div>
 
+                {/* Continue Button */}
                 <button
                   onClick={handleContinue}
                   disabled={amount < minDraw}
@@ -211,6 +220,51 @@ export default function LoanCustomizationStep({ onContinue, onBack, employmentDa
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Mobile: Protection Section (below features) */}
+          <div className="lg:hidden mt-8 space-y-4">
+            <h3 className="text-base font-bold tracking-wide">
+              LINE OF CREDIT PROTECTION
+            </h3>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-5 w-5 accent-black cursor-pointer"
+                checked={loanProtection}
+                onChange={(e) => setLoanProtection(e.target.checked)}
+              />
+              <div className="text-sm">
+                Please present me with the features & benefits of the optional Line of Credit Balance Protection Plan.
+              </div>
+            </label>
+
+            <div className="space-y-3 text-sm text-gray-900">
+              <p>
+                Mogo strongly recommends protecting your line of credit. Protect yourself and your loved ones in the event that you are laid off, injured, critically ill or pass away and can't repay your debt. Coverage also includes Lifetime Milestones and Unpaid Family Leave.{' '}
+                <button className="text-blue-600 underline hover:text-blue-800">
+                  Learn more
+                </button>
+              </p>
+
+              <p className="text-xs text-gray-700">
+                The optional Line of Credit Protection Plan is a Credit Group Insurance Plan Underwritten by Canadian Premier Life Insurance Company and Canadian Premier General Insurance Company.
+              </p>
+            </div>
+
+            {/* Mobile Continue Button */}
+            <button
+              onClick={handleContinue}
+              disabled={amount < minDraw}
+              className={`w-full rounded-lg py-4 font-semibold transition-colors ${
+                amount < minDraw
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              CONTINUE
+            </button>
           </div>
         </div>
       </div>

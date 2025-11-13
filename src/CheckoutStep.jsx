@@ -23,10 +23,10 @@ export default function CheckoutStep({ onContinue, onBack, loanData, fundingData
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-10">
-          <ProgressHeader currentStep={7} totalSteps={7} onBack={onBack} />
+          <ProgressHeader currentStep={6} totalSteps={6} onBack={onBack} />
 
           <p className="text-xs tracking-wide text-gray-500 mb-8">
-            STEP 7 OF 7 – CHECK OUT
+            STEP 6 OF 6 – CHECK OUT
           </p>
 
           <div className="grid lg:grid-cols-[1fr,450px] gap-8">
